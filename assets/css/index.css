@@ -228,6 +228,7 @@
     margin-top: 2rem;
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.9rem;
+    margin-bottom: 1rem;
 }
 
 .footer-info i {
@@ -237,26 +238,62 @@
 
 /* Responsive adjustments */
 @media (max-width: 576px) {
+    .login-wrapper {
+        padding: 0 !important;
+        justify-content: center !important;
+        align-items: flex-start !important;
+    }
+    .login-container {
+        margin: 0 auto !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
     .login-card {
-        padding: 2rem 1.5rem;
-        margin: 0.5rem;
+        padding: 2rem 1rem;
+        margin: 1rem auto;
+        width: 100vw;
+        max-width: 370px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
-    
+    .logo-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
     .logo-placeholder {
-        width: 100px;
-        height: 100px;
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 1rem auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    
-    .logo-placeholder i {
-        font-size: 2.5rem;
+    .logo-placeholder img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border: 2px solid #F8FB60;
+        display: block;
+        margin: 0 auto;
     }
-    
     .brand-text {
-        font-size: 2rem;
+        font-size: 1.7rem;
+        text-align: center;
+        width: 100%;
     }
-    
     .form-floating .form-control {
-        height: 55px;
+        height: 50px;
     }
 }
 

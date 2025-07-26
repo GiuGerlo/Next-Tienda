@@ -53,9 +53,6 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
     <meta name="description" content="Acceso al sistema de gestión Next - Tienda de ropa en Chañar Ladeado">
     <meta name="robots" content="noindex, nofollow">
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico">
-    
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
@@ -194,11 +191,9 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
                 <p class="mb-0">
                     <i class="fas fa-copyright" style="color:#F8FB60;"></i>
                     <?php echo date('Y'); ?> Sistema Next
-                    <i class="fas fa-heart text-danger"></i>
                     &nbsp;|&nbsp;
                     <a href="https://artisansthinking.com" target="_blank" style="text-decoration:none;vertical-align:middle;">
                         <img src="assets/img/logoArtisans.png" alt="Artisans Thinking" style="height:22px;vertical-align:middle;margin-right:4px;">
-                        <span style="color:#727476;font-weight:600;">by Artisans Thinking</span>
                     </a>
                 </p>
             </div>
