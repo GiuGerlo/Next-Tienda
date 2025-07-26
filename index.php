@@ -17,37 +17,6 @@ if (isset($_GET['registered']) && $_GET['registered'] == '1') {
     $success_message = "¡Cuenta creada exitosamente! Ya puedes iniciar sesión.";
 }
 
-// Procesar login si se envió el formulario
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    
-    // Validación básica
-    if (empty($email) || empty($password)) {
-        $error_message = "Por favor, completa todos los campos.";
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error_message = "Por favor, ingresa un email válido.";
-    } else {
-        // Aquí iría la validación contra la base de datos
-        // Por ahora, usuario de prueba: admin@next.com / admin123
-        if ($email === 'admin@next.com' && $password === 'admin123') {
-            $_SESSION['user_id'] = 1;
-            $_SESSION['user_name'] = 'Administrador';
-            $_SESSION['user_email'] = $email;
-            
-            // Recordar login si se marcó la opción
-            if (isset($_POST['remember_me'])) {
-                setcookie('remember_email', $email, time() + (86400 * 30), "/"); // 30 días
-            }
-            
-            header('Location: dashboard/');
-            exit();
-        } else {
-            $error_message = "Credenciales incorrectas. Intenta nuevamente.";
-        }
-    }
-}
-
 // Recuperar email recordado
 $remembered_email = $_COOKIE['remember_email'] ?? '';
 ?>
@@ -120,7 +89,7 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
                 <?php endif; ?>
                 
                 <!-- Formulario de login -->
-                <form method="POST" action="" id="loginForm" novalidate>
+                <form method="POST" action="controllers/login_user.php" id="loginForm" novalidate>
                     
                     <!-- Campo de email -->
                     <div class="form-floating">
@@ -187,9 +156,12 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
                     </div>
                     
                     <!-- Botón de login -->
-                    <button type="submit" class="btn btn-login">
+                    <button type="submit" class="btn btn-login" id="loginBtn">
                         <i class="fas fa-sign-in-alt me-2"></i>
-                        Iniciar Sesión
+                        <span class="btn-text">Iniciar Sesión</span>
+                        <span class="btn-spinner spinner-border spinner-border-sm d-none" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </span>
                     </button>
                 </form>
                 <!-- Información adicional -->
