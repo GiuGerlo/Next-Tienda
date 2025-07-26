@@ -1,0 +1,288 @@
+/**
+ * Login Page Styles - Sistema Next
+ * Estilos específicos para la página de login
+ * Fecha: 25/07/2025
+ */
+
+.login-wrapper {
+    background: linear-gradient(135deg, #F8FB60 0%, #727476 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-wrapper::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    animation: moveGrid 20s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes moveGrid {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(10px, 10px); }
+}
+
+.login-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 450px;
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    padding: 3rem 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    animation: slideUp 0.8s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.logo-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo-placeholder {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #F8FB60 0%, #727476 100%);
+    border-radius: 50%;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.logo-placeholder::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #F8FB60, #727476, #F8FB60);
+    border-radius: 50%;
+    z-index: -1;
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.logo-placeholder i {
+    font-size: 3rem;
+    color: #000;
+    z-index: 2;
+}
+
+.brand-text {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+}
+
+.brand-text .next {
+    background: linear-gradient(135deg, #000 0%, #727476 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.brand-subtitle {
+    color: #6c757d;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+.form-floating {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.form-floating .form-control {
+    height: 60px;
+    border: 2px solid #e9ecef;
+    border-radius: 16px;
+    padding: 1rem 1rem 0.5rem;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+.form-floating .form-control:focus {
+    border-color: #F8FB60;
+    box-shadow: 0 0 0 0.25rem rgba(248, 251, 96, 0.25);
+    background: #fff;
+    transform: translateY(-1px);
+}
+
+.form-floating label {
+    padding: 1rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.password-toggle:hover {
+    background: rgba(248, 251, 96, 0.2);
+    color: #000;
+}
+
+.btn-login {
+    background: linear-gradient(135deg, #F8FB60 0%, #e6e94d 100%);
+    border: none;
+    color: #000;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    width: 100%;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(248, 251, 96, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(248, 251, 96, 0.6);
+    background: linear-gradient(135deg, #e6e94d 0%, #F8FB60 100%);
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+.form-check {
+    margin: 1.5rem 0;
+}
+
+.form-check-input:checked {
+    background-color: #F8FB60;
+    border-color: #F8FB60;
+}
+
+.form-check-label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.alert {
+    border: none;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.25rem;
+    font-weight: 500;
+}
+
+.alert-danger {
+    background: rgba(220, 53, 69, 0.1);
+    color: #721c24;
+    border-left: 4px solid #dc3545;
+}
+
+.footer-info {
+    text-align: center;
+    margin-top: 2rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.footer-info i {
+    color: #F8FB60;
+    margin: 0 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .login-card {
+        padding: 2rem 1.5rem;
+        margin: 0.5rem;
+    }
+    
+    .logo-placeholder {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .logo-placeholder i {
+        font-size: 2.5rem;
+    }
+    
+    .brand-text {
+        font-size: 2rem;
+    }
+    
+    .form-floating .form-control {
+        height: 55px;
+    }
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(248, 251, 96, 0.3);
+    border-top: 4px solid #F8FB60;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
