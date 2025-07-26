@@ -8,6 +8,15 @@ if (isset($_SESSION['user_id'])) {
     exit();
 }
 
+// Variables para manejar mensajes
+$error_message = '';
+$success_message = '';
+
+// Verificar si viene desde registro exitoso
+if (isset($_GET['registered']) && $_GET['registered'] == '1') {
+    $success_message = "¡Cuenta creada exitosamente! Ya puedes iniciar sesión.";
+}
+
 // Procesar login si se envió el formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
@@ -95,11 +104,18 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
                     </p>
                 </div>
                 
-                <!-- Mensaje de error -->
-                <?php if (isset($error_message)): ?>
+                <!-- Mensajes de estado -->
+                <?php if (!empty($error_message)): ?>
                     <div class="alert alert-danger" role="alert">
                         <i class="fas fa-exclamation-triangle me-2"></i>
                         <?php echo htmlspecialchars($error_message); ?>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (!empty($success_message)): ?>
+                    <div class="alert alert-success" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <?php echo htmlspecialchars($success_message); ?>
                     </div>
                 <?php endif; ?>
                 
@@ -176,7 +192,6 @@ $remembered_email = $_COOKIE['remember_email'] ?? '';
                         Iniciar Sesión
                     </button>
                 </form>
-                
                 <!-- Información adicional -->
                 <div class="text-center mt-4">
                     <small class="text-muted">
