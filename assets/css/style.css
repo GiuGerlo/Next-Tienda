@@ -45,9 +45,26 @@ Fecha: 25/07/2025
     box-sizing: border-box;
 }
 
-body {
+html, body {
     font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--color-light-gray);
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Prevenir overflow horizontal */
+.container-fluid {
+    max-width: 100%;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+body {
     color: var(--color-dark);
     line-height: 1.6;
     font-size: 16px;

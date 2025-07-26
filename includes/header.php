@@ -1,57 +1,27 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="icon" type="image/x-icon" href="../assets/img/logo.ico">
-    <!-- Título dinámico -->
-    <title><?php echo isset($page_title) ? $page_title . ' - ' : ''; ?>Next - Sistema de Gestión</title>
-    
-    <!-- Meta descripción -->
-    <meta name="description" content="Sistema Next - Gestión de tienda de ropa en Chañar Ladeado, Santa Fe">
-    <meta name="author" content="Sistema Next">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="../assets/img/ico.ico">
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="../assets/css/style.css">
-    
-    <!-- CSS adicional específico de página -->
-    <?php if(isset($additional_css)): ?>
-        <?php foreach($additional_css as $css): ?>
-            <link rel="stylesheet" href="<?php echo $css; ?>">
-        <?php endforeach; ?>
-    <?php endif; ?>
-</head>
+<?php
+// Solo funciones de sesión para cuando se incluya en otras páginas
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-<body class="fade-in">
-    <!-- Wrapper principal -->
-    <div class="main-wrapper">
-        
-        <!-- Header/Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-light sticky-top">
-            <div class="container-fluid">
-                
-                <!-- Logo/Brand -->
-                <a class="navbar-brand d-flex align-items-center" href="../dashboard/">
-                    <i class="fas fa-store me-2 text-primary"></i>
-                    <span class="fw-bold">
-                        <span class="text-dark">Ne</span><span class="highlight">xt</span>
-                    </span>
-                </a>
+// Función para verificar si el usuario está logueado
+function isLoggedIn() {
+    return isset($_SESSION['user_id']);
+}
+
+// Función para obtener el usuario actual
+function getCurrentUser() {
+    if (isLoggedIn()) {
+        return [
+            'id' => $_SESSION['user_id'],
+            'name' => $_SESSION['user_name'] ?? 'Usuario',
+            'email' => $_SESSION['user_email'] ?? '',
+            'role' => $_SESSION['user_role'] ?? 'user'
+        ];
+    }
+    return null;
+}
+?>
                 
                 <!-- Botón toggle para móvil -->
                 <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -140,7 +110,7 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item text-danger" href="../auth/logout.php">
+                                    <a class="dropdown-item text-danger" href="../controllers/logout.php">
                                         <i class="fas fa-sign-out-alt me-2"></i>
                                         Cerrar Sesión
                                     </a>
