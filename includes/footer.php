@@ -5,7 +5,7 @@
                 <!-- Información de la empresa -->
                 <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
                     <div class="d-flex align-items-center mb-3">
-                        <img src="../assets/img/logo.jpg" alt="Next Logo" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" class="me-2">
+                        <img src="<?= isset($base_path) ? $base_path : '../' ?>assets/img/logo.jpg" alt="Next Logo" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" class="me-2">
                         <h5 class="mb-0 fw-bold">
                             <span class="text-dark">Ne</span><span style="color: var(--next-yellow);">xt</span>
                         </h5>
@@ -21,7 +21,7 @@
                         </div>
                         <div class="d-flex align-items-center">
                             <i class="fas fa-calendar me-2" style="color: var(--next-yellow);"></i>
-                            <small>Desarrollado en Julio 2025</small>
+                            <small>Desarrollado por <a href="https://artisansthinking.com" target="_blank"><img src="../assets/img/logoArtisans.png" width="100px" alt="Logo Artisans"></a></small>
                         </div>
                     </div>
                 </div>
@@ -31,22 +31,22 @@
                     <h6 class="fw-bold text-dark mb-3">Navegación</h6>
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <a href="../dashboard/" class="text-muted text-decoration-none hover-link">
+                            <a href="dashboard/" class="text-muted text-decoration-none hover-link">
                                 <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="../ventas/" class="text-muted text-decoration-none hover-link">
+                            <a href="ventas/" class="text-muted text-decoration-none hover-link">
                                 <i class="fas fa-shopping-cart me-2"></i>Ventas
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="../prestamos/" class="text-muted text-decoration-none hover-link">
+                            <a href="prestamos/" class="text-muted text-decoration-none hover-link">
                                 <i class="fas fa-handshake me-2"></i>Préstamos
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="../usuarios/" class="text-muted text-decoration-none hover-link">
+                            <a href="usuarios/" class="text-muted text-decoration-none hover-link">
                                 <i class="fas fa-users me-2"></i>Usuarios
                             </a>
                         </li>
@@ -111,8 +111,6 @@
                 </div>
                 <div class="col-md-6 text-md-end">
                     <small class="text-muted">
-                        <a href="#" class="text-muted text-decoration-none me-3">Términos</a>
-                        <a href="#" class="text-muted text-decoration-none me-3">Privacidad</a>
                         <span class="text-success">
                             <i class="fas fa-circle me-1" style="font-size: 6px;"></i>
                             v1.0.0
@@ -147,15 +145,6 @@
             }
         }
     </style>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    
-                </div>
-            </div>
-        </footer>
-    </div>
     
     <!-- Scripts de Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -164,13 +153,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <!-- Scripts personalizados -->
-    <script src="../assets/js/main.js"></script>
+    <script src="<?= isset($base_path) ? $base_path : '../' ?>assets/js/main.js"></script>
     
     <!-- Scripts adicionales específicos de página -->
     <?php if(isset($additional_js)): ?>
-        <?php foreach($additional_js as $js): ?>
-            <script src="<?php echo $js; ?>"></script>
-        <?php endforeach; ?>
+        <?= $additional_js ?>
     <?php endif; ?>
     
     <!-- Script para actualizar la hora en tiempo real -->

@@ -454,41 +454,6 @@ function hideLoading(element = null) {
     }
 }
 
-/**
- * Actualizar estadísticas en tiempo real
- */
-function updateStats() {
-    apiRequest('../api/stats.php')
-        .then(result => {
-            if (result.success) {
-                const stats = result.data;
-                
-                // Actualizar contadores en el footer
-                const ventasCounter = document.getElementById('footer-ventas-count');
-                const prestamosCounter = document.getElementById('footer-prestamos-count');
-                
-                if (ventasCounter) ventasCounter.textContent = stats.ventas || '0';
-                if (prestamosCounter) prestamosCounter.textContent = stats.prestamos || '0';
-                
-                // Actualizar notificaciones
-                updateNotifications(stats.notifications || 0);
-            }
-        })
-        .catch(error => {
-            console.error('Error updating stats:', error);
-        });
-}
-
-/**
- * Actualizar contador de notificaciones
- */
-function updateNotifications(count) {
-    const badge = document.querySelector('.navbar-nav .badge');
-    if (badge) {
-        badge.textContent = count;
-        badge.style.display = count > 0 ? 'inline' : 'none';
-    }
-}
 
 // Exportar funciones principales para uso global
 window.NextSystem = {
@@ -501,12 +466,5 @@ window.NextSystem = {
     debounce,
     apiRequest,
     showLoading,
-    hideLoading,
-    updateStats
+    hideLoading
 };
-
-// Actualizar estadísticas cada 5 minutos
-setInterval(updateStats, 300000);
-
-// Ejecutar primera actualización después de 2 segundos
-setTimeout(updateStats, 2000);

@@ -1,42 +1,62 @@
 <?php
-require_once '../controllers/auth.php';
-requireAuth();
+// Iniciar sesión
+session_start();
+
+// Incluir middleware de autenticación
+require_once '../../controllers/auth.php';
+
+// Verificar autenticación
+requireAuth('../../index.php');
+
+// Obtener datos del usuario actual
 $user = getCurrentUser();
+
+// Configuración de la página
+$page_title = 'Préstamos';
+$current_page = 'prestamos';
+
+// Incluir header
+include '../../includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Préstamos - Sistema Next</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/style.css">
-</head>
-<body class="d-flex flex-column min-vh-100">
-    <div class="container-fluid mt-4 flex-grow-1">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header text-white" style="background: var(--next-yellow); color: var(--next-black) !important;">
-                        <h4 class="mb-0 text-dark"><i class="fas fa-handshake me-2"></i>Gestión de Préstamos</h4>
+
+    <main class="dashboard-main">
+        <div class="container-fluid px-4">
+            <!-- Header del módulo -->
+            <div class="dashboard-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h1 class="dashboard-title">
+                            <i class="fas fa-handshake me-3"></i>Préstamos
+                        </h1>
+                        <p class="dashboard-subtitle">
+                            Gestión de préstamos y créditos
+                        </p>
                     </div>
-                    <div class="card-body">
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>Módulo en desarrollo:</strong> Este módulo estará disponible próximamente.
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h5 class="card-title">
+                                <i class="fas fa-handshake me-2"></i>
+                                Gestión de Préstamos
+                            </h5>
                         </div>
-                        <a href="../dashboard/" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
-                        </a>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Módulo en desarrollo:</strong> Este módulo estará disponible próximamente.
+                            </div>
+                            <a href="../" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Volver al Dashboard
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <?php include '../includes/footer.php'; ?>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    </main>
+
+<?php include '../../includes/footer.php'; ?>
