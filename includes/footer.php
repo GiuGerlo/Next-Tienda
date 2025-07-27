@@ -21,7 +21,7 @@
                         </div>
                         <div class="d-flex align-items-center">
                             <i class="fas fa-calendar me-2" style="color: var(--next-yellow);"></i>
-                            <small>Desarrollado por <a href="https://artisansthinking.com" target="_blank"><img src="../assets/img/logoArtisans.png" width="100px" alt="Logo Artisans"></a></small>
+                            <small>Desarrollado por <a href="https://artisansthinking.com" target="_blank"><img src="<?= isset($base_path) ? $base_path : '../' ?>assets/img/logoArtisans.png" width="100px" alt="Logo Artisans"></a></small>
                         </div>
                     </div>
                 </div>

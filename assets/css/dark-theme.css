@@ -1,0 +1,365 @@
+/**
+ * Tema Oscuro - Sistema Next
+ * Variables y estilos para el modo oscuro
+ */
+
+:root {
+    /* Colores principales - Modo Oscuro */
+    --next-yellow: #FFD700;
+    --next-black: #1a1a1a;
+    --next-white: #ffffff;
+    --next-gray: #2d2d2d;
+    --next-light-gray: #3a3a3a;
+    --next-dark-gray: #121212;
+    
+    /* Colores de fondo */
+    --bg-primary: #121212;
+    --bg-secondary: #1e1e1e;
+    --bg-tertiary: #2d2d2d;
+    --bg-card: #1e1e1e;
+    --bg-navbar: #1a1a1a;
+    
+    /* Colores de texto */
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    --text-muted: #888888;
+    
+    /* Bordes */
+    --border-color: #3a3a3a;
+    --border-light: #2d2d2d;
+    
+    /* Sombras */
+    --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.4);
+    --shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Estilos generales */
+body {
+    background-color: var(--bg-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Navbar */
+.navbar {
+    background-color: var(--bg-navbar) !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand span {
+    color: var(--text-primary) !important;
+}
+
+.navbar-nav .nav-link {
+    color: var(--text-secondary) !important;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: var(--next-yellow) !important;
+}
+
+.navbar-toggler {
+    border-color: var(--border-color) !important;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Dropdown */
+.dropdown-menu {
+    background-color: var(--bg-secondary) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-medium) !important;
+}
+
+.dropdown-item {
+    color: var(--text-secondary) !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+}
+
+.dropdown-header {
+    color: var(--text-muted) !important;
+}
+
+.dropdown-divider {
+    border-color: var(--border-color) !important;
+}
+
+/* Cards */
+.dashboard-card,
+.card {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-light) !important;
+}
+
+.card-header {
+    background-color: var(--bg-tertiary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.card-title,
+.card-text {
+    color: var(--text-primary) !important;
+}
+
+/* Stats Cards */
+.stats-card {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.stats-card .stats-content h3,
+.stats-card .stats-content p {
+    color: var(--text-primary) !important;
+}
+
+.stats-icon {
+    background-color: var(--next-yellow) !important;
+    color: var(--next-black) !important;
+}
+
+/* Formularios */
+.form-control,
+.form-select {
+    background-color: var(--bg-tertiary) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--bg-tertiary) !important;
+    border-color: var(--next-yellow) !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25) !important;
+    color: var(--text-primary) !important;
+}
+
+.form-control::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.form-label {
+    color: var(--text-primary) !important;
+}
+
+/* Botones */
+.btn-primary {
+    background-color: var(--next-yellow) !important;
+    border-color: var(--next-yellow) !important;
+    color: var(--next-black) !important;
+}
+
+.btn-primary:hover {
+    background-color: #e6c200 !important;
+    border-color: #e6c200 !important;
+    color: var(--next-black) !important;
+}
+
+.btn-secondary {
+    background-color: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-secondary) !important;
+    border-color: var(--border-light) !important;
+    color: var(--text-primary) !important;
+}
+
+.btn-outline-secondary {
+    border-color: var(--border-color) !important;
+    color: var(--text-secondary) !important;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--bg-tertiary) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Tablas */
+.table {
+    color: var(--text-primary) !important;
+}
+
+.table-dark {
+    --bs-table-bg: var(--bg-secondary) !important;
+    --bs-table-striped-bg: var(--bg-tertiary) !important;
+    --bs-table-hover-bg: var(--bg-tertiary) !important;
+    --bs-table-border-color: var(--border-color) !important;
+}
+
+.table > :not(caption) > * > * {
+    border-bottom-color: var(--border-color) !important;
+}
+
+/* Alertas */
+.alert-info {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+    border-color: rgba(13, 202, 240, 0.2) !important;
+    color: #9eeaf9 !important;
+}
+
+.alert-warning {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+    border-color: rgba(255, 193, 7, 0.2) !important;
+    color: #fff3cd !important;
+}
+
+.alert-success {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+    border-color: rgba(25, 135, 84, 0.2) !important;
+    color: #d1e7dd !important;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    border-color: rgba(220, 53, 69, 0.2) !important;
+    color: #f8d7da !important;
+}
+
+/* Badges */
+.badge {
+    color: var(--next-black) !important;
+}
+
+.badge.bg-primary {
+    background-color: var(--next-yellow) !important;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: var(--next-black) !important;
+}
+
+.badge.bg-danger {
+    background-color: #dc3545 !important;
+    color: white !important;
+}
+
+/* Footer */
+footer {
+    background-color: var(--bg-navbar) !important;
+    border-top: 1px solid var(--border-color) !important;
+    color: var(--text-secondary) !important;
+}
+
+/* Dashboard específico */
+.dashboard-header h1 {
+    color: var(--text-primary) !important;
+}
+
+.dashboard-subtitle {
+    color: var(--text-secondary) !important;
+}
+
+.dashboard-date {
+    color: var(--text-muted) !important;
+}
+
+/* Estados de tendencia */
+.stats-trend.positive {
+    color: #28a745 !important;
+}
+
+.stats-trend.negative {
+    color: #dc3545 !important;
+}
+
+.stats-trend.neutral {
+    color: var(--text-muted) !important;
+}
+
+/* Loading spinner */
+.loading-spinner {
+    border-color: var(--border-color) !important;
+    border-left-color: var(--next-yellow) !important;
+}
+
+/* Empty states */
+.empty-state {
+    color: var(--text-muted) !important;
+}
+
+.empty-state i {
+    color: var(--text-muted) !important;
+}
+
+/* Texto de ayuda */
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+/* Links */
+a {
+    color: var(--next-yellow) !important;
+}
+
+a:hover {
+    color: #e6c200 !important;
+}
+
+/* Modales */
+.modal-content {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color) !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color) !important;
+}
+
+.modal-title {
+    color: var(--text-primary) !important;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--border-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .navbar-collapse {
+        background-color: var(--bg-navbar) !important;
+        border-top: 1px solid var(--border-color);
+        margin-top: 1rem;
+        padding-top: 1rem;
+    }
+}
+
+/* Animaciones suaves para transiciones de tema */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}

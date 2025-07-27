@@ -111,7 +111,7 @@ if (strpos($current_dir, '/dashboard/') !== false && substr_count($current_dir, 
                             <li>
                                 <h6 class="dropdown-header">Mi Cuenta</h6>
                             </li>
-                            <li><a class="dropdown-item" href="<?= $base_path ?>configuracion/"><i class="fas fa-cog me-2"></i>Configuración</a></li>
+                            <li><a class="dropdown-item" href="<?= $base_path ?>dashboard/configuracion/"><i class="fas fa-cog me-2"></i>Configuración</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
