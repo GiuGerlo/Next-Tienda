@@ -68,7 +68,6 @@ try {
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?= $base_path ?>assets/css/style.css">
     <link rel="stylesheet" href="<?= $base_path ?>assets/css/dashboard.css">
-    <link rel="stylesheet" href="<?= $base_path ?>assets/css/theme-enhancements.css">
     
     <!-- Tema dinámico -->
     <?php if ($tema_sistema === 'dark'): ?>

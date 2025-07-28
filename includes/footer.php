@@ -31,22 +31,22 @@
                     <h6 class="fw-bold text-dark mb-3">Navegación</h6>
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <a href="dashboard/" class="text-muted text-decoration-none hover-link">
+                            <a href="<?= $base_path ?>dashboard/" class="text-muted text-decoration-none hover-link">
                                 <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="ventas/" class="text-muted text-decoration-none hover-link">
+                            <a href="<?= $base_path ?>dashboard/ventas/" class="text-muted text-decoration-none hover-link">
                                 <i class="fas fa-shopping-cart me-2"></i>Ventas
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="prestamos/" class="text-muted text-decoration-none hover-link">
+                            <a href="<?= $base_path ?>dashboard/prestamos/" class="text-muted text-decoration-none hover-link">
                                 <i class="fas fa-handshake me-2"></i>Préstamos
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="usuarios/" class="text-muted text-decoration-none hover-link">
+                            <a href="<?= $base_path ?>dashboard/usuarios/" class="text-muted text-decoration-none hover-link">
                                 <i class="fas fa-users me-2"></i>Usuarios
                             </a>
                         </li>

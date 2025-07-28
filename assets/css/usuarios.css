@@ -27,7 +27,7 @@
 }
 
 #tablaUsuarios thead th {
-    background-color: var(--bs-primary);
+    background-color: var(--bs-gray-600);
     color: white;
     font-weight: 600;
     border: none;
@@ -111,7 +111,7 @@
 }
 
 .modal-header {
-    background: linear-gradient(135deg, var(--bs-primary) 0%, #0550ae 100%);
+    background: linear-gradient(135deg, var(--bs-gray-600) 0%, #495057 100%);
     color: white;
     border-radius: 12px 12px 0 0;
     border-bottom: none;
@@ -333,7 +333,6 @@
 }
 
 .swal2-confirm {
-    background-color: var(--bs-primary) !important;
     border-radius: 8px;
 }
 
