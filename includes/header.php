@@ -22,6 +22,26 @@ if (strpos($current_dir, '/dashboard/') !== false && substr_count($current_dir, 
 } else {
     $base_path = '../';
 }
+
+// Obtener configuración del tema desde la base de datos
+$tema_sistema = 'light'; // Valor por defecto
+try {
+    // Incluir conexión a la base de datos si no está incluida
+    if (!isset($pdo)) {
+        require_once $base_path . 'config/connect.php';
+    }
+    
+    $stmt = $pdo->prepare("SELECT valor FROM configuracion WHERE clave = 'tema_sistema'");
+    $stmt->execute();
+    $resultado = $stmt->fetchColumn();
+    
+    if ($resultado) {
+        $tema_sistema = $resultado;
+    }
+} catch (Exception $e) {
+    // Si hay error, mantener el tema por defecto
+    error_log("Error al obtener configuración del tema: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -30,6 +50,7 @@ if (strpos($current_dir, '/dashboard/') !== false && substr_count($current_dir, 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="theme-color" content="<?= $tema_sistema === 'dark' ? '#1a1a1a' : '#ffffff' ?>">
     <title><?= isset($page_title) ? $page_title . ' - Sistema Next' : 'Dashboard - Sistema Next' ?></title>
 
     <!-- Favicon -->
@@ -47,13 +68,19 @@ if (strpos($current_dir, '/dashboard/') !== false && substr_count($current_dir, 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?= $base_path ?>assets/css/style.css">
     <link rel="stylesheet" href="<?= $base_path ?>assets/css/dashboard.css">
-
+    <link rel="stylesheet" href="<?= $base_path ?>assets/css/theme-enhancements.css">
+    
+    <!-- Tema dinámico -->
+    <?php if ($tema_sistema === 'dark'): ?>
+        <link rel="stylesheet" href="<?= $base_path ?>assets/css/dark-theme.css">
+    <?php endif; ?>
+    
     <?php if (isset($additional_css)): ?>
         <?= $additional_css ?>
     <?php endif; ?>
 </head>
 
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100" data-theme="<?= $tema_sistema ?>">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
         <div class="container-fluid px-4">

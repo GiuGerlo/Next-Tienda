@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'direccion_empresa' => $_POST['direccion_empresa'] ?? '',
             'telefono_empresa' => $_POST['telefono_empresa'] ?? '',
             'email_empresa' => $_POST['email_empresa'] ?? '',
-            'tema_sistema' => 'light' // Siempre tema claro
+            'tema_sistema' => $_POST['tema_sistema'] ?? 'light'
         ];
 
         foreach ($configuraciones as $clave => $valor) {
@@ -80,7 +80,7 @@ $config = [
     'direccion_empresa' => $configuraciones['direccion_empresa'] ?? 'Chañar Ladeado, Santa Fe, Argentina',
     'telefono_empresa' => $configuraciones['telefono_empresa'] ?? '',
     'email_empresa' => $configuraciones['email_empresa'] ?? 'info@next.com',
-    'tema_sistema' => 'light', // Siempre tema claro
+    'tema_sistema' => $configuraciones['tema_sistema'] ?? 'light',
     'version_sistema' => $configuraciones['version_sistema'] ?? '1.0.0'
 ];
 
@@ -160,11 +160,23 @@ include '../../includes/header.php';
                             <div class="mb-3">
                                 <label for="tema_sistema" class="form-label">Tema del Sistema</label>
                                 <select class="form-select" id="tema_sistema" name="tema_sistema">
-                                    <option value="light" <?= $config['tema_sistema'] === 'light' || $config['tema_sistema'] === 'default' ? 'selected' : '' ?>>Claro (Predeterminado)</option>
+                                    <option value="light" <?= $config['tema_sistema'] === 'light' ? 'selected' : '' ?>>
+                                        🌞 Claro
+                                    </option>
+                                    <option value="dark" <?= $config['tema_sistema'] === 'dark' ? 'selected' : '' ?>>
+                                        🌙 Oscuro
+                                    </option>
                                 </select>
                                 <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Actualmente solo está disponible el tema claro
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        El cambio de tema se aplicará automáticamente al guardar la configuración.
+                                        <br>
+                                        <strong>Tema actual:</strong> 
+                                        <span class="badge bg-<?= $config['tema_sistema'] === 'dark' ? 'dark' : 'light text-dark' ?> ms-1">
+                                            <?= $config['tema_sistema'] === 'dark' ? '🌙 Oscuro' : '🌞 Claro' ?>
+                                        </span>
+                                    </small>
                                 </div>
                             </div>
 
@@ -267,5 +279,48 @@ include '../../includes/header.php';
         </div>
     </div>
 </main>
+
+<script>
+// Preview del tema en tiempo real
+document.getElementById('tema_sistema').addEventListener('change', function() {
+    const tema = this.value;
+    const darkThemeLink = document.querySelector('link[href*="dark-theme.css"]');
+    
+    if (tema === 'dark') {
+        if (!darkThemeLink) {
+            // Crear el link para el tema oscuro
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = '../../assets/css/dark-theme.css';
+            document.head.appendChild(link);
+        }
+    } else {
+        // Remover el tema oscuro si existe
+        if (darkThemeLink) {
+            darkThemeLink.remove();
+        }
+    }
+    
+    // Mostrar mensaje de preview
+    const previewAlert = document.createElement('div');
+    previewAlert.className = 'alert alert-info alert-dismissible fade show mt-2';
+    previewAlert.innerHTML = `
+        <i class="fas fa-eye me-2"></i>
+        Vista previa del tema <strong>${tema === 'dark' ? 'Oscuro' : 'Claro'}</strong>. 
+        Guarda los cambios para aplicar permanentemente.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Insertar después del select
+    this.parentNode.appendChild(previewAlert);
+    
+    // Auto-remover después de 3 segundos
+    setTimeout(() => {
+        if (previewAlert.parentNode) {
+            previewAlert.remove();
+        }
+    }, 3000);
+});
+</script>
 
 <?php include '../../includes/footer.php'; ?>
