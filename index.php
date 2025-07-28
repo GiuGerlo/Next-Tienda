@@ -9,8 +9,13 @@ if (isset($_SESSION['user_id'])) {
 }
 
 // Variables para manejar mensajes
-$error_message = '';
+$error_message = $_SESSION['error_message'] ?? '';
 $success_message = '';
+
+// Limpiar mensaje de error después de mostrarlo
+if (!empty($error_message)) {
+    unset($_SESSION['error_message']);
+}
 
 // Verificar si viene desde registro exitoso
 if (isset($_GET['registered']) && $_GET['registered'] == '1') {
