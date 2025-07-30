@@ -106,14 +106,14 @@ include '../../includes/header.php';
             <div class="col-12">
                 <div class="dashboard-card">
                     <div class="card-header">
-                        <div class="row align-items-center">
-                            <div class="col-md-6">
+                        <div class="row align-items-center col-12">
+                            <div class="col-6">
                                 <h5 class="card-title mb-0">
                                     <i class="fas fa-list me-2"></i>
                                     Lista de Ventas
                                 </h5>
                             </div>
-                            <div class="col-md-6 text-end">
+                            <div class="col-6 text-end">
                                 <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#filtrosVentas">
                                     <i class="fas fa-filter me-1"></i>Filtros</small>
                                 </button>
@@ -405,7 +405,7 @@ include '../../includes/header.php';
 
 <!-- Modal para gestionar pagos -->
 <div class="modal fade" id="modalPagos" tabindex="-1" aria-labelledby="modalPagosLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modalPagosLabel">

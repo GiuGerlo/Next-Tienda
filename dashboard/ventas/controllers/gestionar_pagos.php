@@ -23,6 +23,9 @@ if (!isAuthenticated()) {
 // Incluir conexión a la base de datos
 require_once '../../../config/connect.php';
 
+// Configurar zona horaria de Argentina
+date_default_timezone_set('America/Argentina/Buenos_Aires');
+
 try {
     
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -36,15 +39,15 @@ try {
         // Obtener datos de la venta
         $sql_venta = "
             SELECT 
-                id,
-                cliente_nombre,
-                total,
-                estado_pago,
-                monto_pagado,
-                monto_adeudado,
-                DATE_FORMAT(fecha_venta, '%d/%m/%Y') as fecha_venta_formatted
-            FROM ventas 
-            WHERE id = ?
+                v.id,
+                v.cliente_nombre,
+                v.total,
+                v.estado_pago,
+                v.monto_pagado,
+                v.monto_adeudado,
+                DATE_FORMAT(v.fecha_venta, '%d/%m/%Y %H:%i') as fecha_venta_formatted
+            FROM ventas v
+            WHERE v.id = ?
         ";
         
         $stmt_venta = $pdo->prepare($sql_venta);
@@ -58,12 +61,12 @@ try {
         // Obtener historial de pagos
         $sql_pagos = "
             SELECT 
-                id,
-                monto,
-                metodo_pago,
-                DATE_FORMAT(fecha_pago, '%d/%m/%Y %H:%i') as fecha_pago_formatted,
-                comprobante,
-                observaciones,
+                pv.id,
+                pv.monto,
+                pv.metodo_pago,
+                DATE_FORMAT(pv.fecha_pago, '%d/%m/%Y %H:%i') as fecha_pago_formatted,
+                pv.comprobante,
+                pv.observaciones,
                 u.nombre_completo as usuario_nombre
             FROM pagos_ventas pv
             LEFT JOIN usuarios u ON pv.usuario_id = u.id

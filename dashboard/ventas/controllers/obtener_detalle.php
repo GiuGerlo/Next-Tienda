@@ -35,7 +35,7 @@ try {
         SELECT 
             v.*,
             u.nombre_completo as usuario_nombre,
-            DATE_FORMAT(v.fecha_venta, '%d/%m/%Y') as fecha_formatted,
+            DATE_FORMAT(v.fecha_venta, '%d/%m/%Y %H:%i') as fecha_formatted,
             DATE_FORMAT(v.fecha_creacion, '%d/%m/%Y %H:%i') as fecha_creacion_formatted
         FROM ventas v 
         LEFT JOIN usuarios u ON v.usuario_id = u.id 

@@ -628,27 +628,6 @@ $(document).ready(function() {
         editandoVenta = false;
     }
 
-    // Gestionar pagos
-    function gestionarPagosFuncion(id) {
-        $.get('controllers/gestionar_pagos.php', { id: id })
-            .done(function(response) {
-                if (response.success) {
-                    mostrarModalPagos(response.venta, response.pagos);
-                } else {
-                    Toast.fire({
-                        icon: 'error',
-                        title: response.message || 'Error al obtener información de pagos'
-                    });
-                }
-            })
-            .fail(function() {
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Error de conexión'
-                });
-            });
-    }
-
     // Mostrar modal de gestión de pagos
     function mostrarModalPagos(venta, pagos) {
         let html = `
@@ -692,9 +671,9 @@ $(document).ready(function() {
                                     <select class="form-select" id="pagoMetodo" required>
                                         <option value="">Seleccionar método</option>
                                         <option value="efectivo">Efectivo</option>
+                                        <option value="transferencia">Transferencia</option>
                                         <option value="tarjeta_debito">Tarjeta de Débito</option>
                                         <option value="tarjeta_credito">Tarjeta de Crédito</option>
-                                        <option value="transferencia">Transferencia</option>
                                         <option value="cuenta_corriente">Cuenta Corriente</option>
                                         <option value="otro">Otro</option>
                                     </select>
@@ -712,9 +691,11 @@ $(document).ready(function() {
                                               placeholder="Observaciones del pago..."></textarea>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-save me-1"></i>Registrar Pago
-                            </button>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-1"></i>Registrar Pago
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -727,16 +708,17 @@ $(document).ready(function() {
                     <div class="card-header">
                         <h6 class="mb-0"><i class="fas fa-history me-2"></i>Historial de Pagos</h6>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-sm">
-                                <thead>
+                            <table class="table table-sm table-hover mb-0">
+                                <thead class="table-light">
                                     <tr>
-                                        <th>Fecha</th>
-                                        <th>Monto</th>
-                                        <th>Método</th>
-                                        <th>Comprobante</th>
-                                        <th>Usuario</th>
+                                        <th style="width: 20%;">Fecha</th>
+                                        <th style="width: 15%;">Monto</th>
+                                        <th style="width: 20%;">Método</th>
+                                        <th style="width: 15%;">Comprobante</th>
+                                        <th style="width: 20%;">Usuario</th>
+                                        <th style="width: 10%;" class="text-center">Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -745,11 +727,18 @@ $(document).ready(function() {
             pagos.forEach(pago => {
                 html += `
                     <tr>
-                        <td>${pago.fecha_pago_formatted}</td>
-                        <td>$${parseInt(pago.monto).toLocaleString('es-AR')}</td>
-                        <td>${pago.metodo_pago}</td>
-                        <td>${pago.comprobante || '-'}</td>
-                        <td>${pago.usuario_nombre}</td>
+                        <td><small>${pago.fecha_pago_formatted}</small></td>
+                        <td><span class="fw-bold text-success">$${parseInt(pago.monto).toLocaleString('es-AR')}</span></td>
+                        <td><small class="text-capitalize">${pago.metodo_pago.replace('_', ' ')}</small></td>
+                        <td><small>${pago.comprobante || '-'}</small></td>
+                        <td><small>${pago.usuario_nombre}</small></td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                    onclick="eliminarPago(${pago.id}, ${pago.monto}, '${pago.fecha_pago_formatted}')" 
+                                    title="Eliminar pago">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
                     </tr>
                 `;
             });
@@ -1096,6 +1085,395 @@ $(document).ready(function() {
             title: 'Todos los filtros limpiados'
         });
     });
+
+    // Función para gestionar pagos
+    function gestionarPagosFuncion(id) {
+        console.log('Gestionando pagos para venta ID:', id);
+        
+        $.get('controllers/gestionar_pagos.php', { id: id })
+            .done(function(response) {
+                console.log('Respuesta del servidor:', response);
+                if (response.success) {
+                    mostrarModalPagos(response.venta, response.pagos);
+                } else {
+                    console.error('Error del servidor:', response.message);
+                    Toast.fire({
+                        icon: 'error',
+                        title: response.message || 'Error al obtener información de pagos'
+                    });
+                }
+            })
+            .fail(function(xhr, status, error) {
+                console.error('Error de conexión:', xhr.responseText);
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Error de conexión: ' + error
+                });
+            });
+    }
+
+    // Mostrar modal de gestión de pagos
+    function mostrarModalPagos(venta, pagos) {
+        let html = `
+            <div class="row mb-4">
+                <div class="col-md-6 text-center">
+                    <h6><i class="fas fa-info-circle me-2"></i>Información de la Venta</h6>
+                    <p><strong>Cliente:</strong> ${venta.cliente_nombre}</p>
+                    <p><strong>Fecha:</strong> ${venta.fecha_venta_formatted}</p>
+                    <p><strong>Total:</strong> $${parseInt(venta.total).toLocaleString('es-AR')}</p>
+                </div>
+                <div class="col-md-6 text-center">
+                    <h6><i class="fas fa-money-bill me-2"></i>Estado de Pagos</h6>
+                    <p><strong>Pagado:</strong> <span class="text-success">$${parseInt(venta.monto_pagado).toLocaleString('es-AR')}</span></p>
+                    <p><strong>Adeudado:</strong> <span class="text-danger">$${parseInt(venta.monto_adeudado).toLocaleString('es-AR')}</span></p>
+                    <p><strong>Estado:</strong> <span class="badge bg-${venta.estado_pago === 'completo' ? 'success' : 'warning'}">${venta.estado_pago === 'completo' ? 'Completo' : 'Pendiente'}</span></p>
+                </div>
+            </div>
+        `;
+
+        if (venta.monto_adeudado > 0) {
+            html += `
+                <div class="card mb-4">
+                    <div class="card-header" style="background-color: #6D757D;">
+                        <h6 class="mb-0"><i class="fas fa-plus me-2"></i>Registrar Nuevo Pago</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="formNuevoPago">
+                            <input type="hidden" id="pagoVentaId" value="${venta.id}">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="pagoMonto" class="form-label">Monto <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="pagoMonto" 
+                                               step="0.01" min="0.01" max="${venta.monto_adeudado}" required>
+                                    </div>
+                                    <small class="text-muted">Máximo: $${parseInt(venta.monto_adeudado).toLocaleString('es-AR')}</small>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="pagoMetodo" class="form-label">Método de Pago <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="pagoMetodo" required>
+                                        <option value="">Seleccionar método</option>
+                                        <option value="efectivo">Efectivo</option>
+                                        <option value="transferencia">Transferencia</option>
+                                        <option value="tarjeta_debito">Tarjeta de Débito</option>
+                                        <option value="tarjeta_credito">Tarjeta de Crédito</option>
+                                        <option value="cuenta_corriente">Cuenta Corriente</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="pagoComprobante" class="form-label">Comprobante</label>
+                                    <input type="text" class="form-control" id="pagoComprobante" 
+                                           placeholder="Número de comprobante">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="pagoObservaciones" class="form-label">Observaciones</label>
+                                    <textarea class="form-control" id="pagoObservaciones" rows="2" 
+                                              placeholder="Observaciones del pago..."></textarea>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-1"></i>Registrar Pago
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (pagos.length > 0) {
+            html += `
+                <div class="card">
+                    <div class="card-header" style="background-color: #6D757D;">
+                        <h6 class="mb-0"><i class="fas fa-history me-2"></i>Historial de Pagos</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Monto</th>
+                                        <th>Método</th>
+                                        <th>Comprobante</th>
+                                        <th>Usuario</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+            `;
+            
+            pagos.forEach(pago => {
+                html += `
+                    <tr>
+                        <td>${pago.fecha_pago_formatted}</td>
+                        <td>$${parseInt(pago.monto).toLocaleString('es-AR')}</td>
+                        <td>${pago.metodo_pago}</td>
+                        <td>${pago.comprobante || '-'}</td>
+                        <td>${pago.usuario_nombre}</td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        $('#contenidoPagos').html(html);
+        $('#modalPagos').modal('show');
+
+        // Enlazar evento del formulario de nuevo pago
+        $('#formNuevoPago').off('submit').on('submit', function(e) {
+            e.preventDefault();
+            registrarNuevoPago();
+        });
+    }
+
+    // Registrar nuevo pago
+    function registrarNuevoPago() {
+        const formData = new FormData();
+        formData.append('venta_id', $('#pagoVentaId').val());
+        formData.append('monto', $('#pagoMonto').val());
+        formData.append('metodo_pago', $('#pagoMetodo').val());
+        formData.append('comprobante', $('#pagoComprobante').val());
+        formData.append('observaciones', $('#pagoObservaciones').val());
+
+        $.ajax({
+            url: 'controllers/gestionar_pagos.php',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            dataType: 'json'
+        })
+        .done(function(response) {
+            if (response.success) {
+                Toast.fire({
+                    icon: 'success',
+                    title: response.message
+                });
+                $('#modalPagos').modal('hide');
+                tabla.ajax.reload();
+                cargarEstadisticas();
+            } else {
+                Toast.fire({
+                    icon: 'error',
+                    title: response.message
+                });
+            }
+        })
+        .fail(function() {
+            Toast.fire({
+                icon: 'error',
+                title: 'Error de conexión'
+            });
+        });
+    }
+
+    // Función para editar venta
+    function editarVentaFuncion(id) {
+        $.get('controllers/obtener_venta.php', { id: id })
+            .done(function(response) {
+                if (response.success) {
+                    cargarDatosVenta(response.venta, response.productos);
+                    $('#modalVenta').modal('show');
+                } else {
+                    Toast.fire({
+                        icon: 'error',
+                        title: response.message || 'Error al obtener la venta'
+                    });
+                }
+            })
+            .fail(function() {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Error de conexión'
+                });
+            });
+    }
+
+    // Función para eliminar venta con doble confirmación
+    function eliminarVentaFuncion(id) {
+        // Primera confirmación
+        Swal.fire({
+            title: '¿Eliminar venta?',
+            text: 'Esta acción eliminará permanentemente la venta y todos sus datos relacionados',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#fd7e14',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Continuar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Segunda confirmación más específica
+                Swal.fire({
+                    title: '¡CONFIRMACIÓN FINAL!',
+                    html: `
+                        <div class="text-danger mb-3">
+                            <i class="fas fa-exclamation-triangle fa-3x"></i>
+                        </div>
+                        <p><strong>¿Estás absolutamente seguro?</strong></p>
+                        <p>Esta acción:</p>
+                        <ul class="text-start">
+                            <li>Eliminará la venta de forma permanente</li>
+                            <li>Eliminará todos los productos asociados</li>
+                            <li>Eliminará todo el historial de pagos</li>
+                            <li><strong>NO se puede deshacer</strong></li>
+                        </ul>
+                    `,
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'SÍ, ELIMINAR DEFINITIVAMENTE',
+                    cancelButtonText: 'No, cancelar',
+                    focusCancel: true
+                }).then((finalResult) => {
+                    if (finalResult.isConfirmed) {
+                        // Proceder con la eliminación
+                        const btnEliminar = $(`button[onclick*="${id}"]`);
+                        
+                        $.post('controllers/eliminar_venta.php', { id: id })
+                            .done(function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: '¡Eliminado!',
+                                        text: response.message,
+                                        icon: 'success',
+                                        timer: 2000,
+                                        showConfirmButton: false
+                                    });
+                                    tabla.ajax.reload();
+                                    cargarEstadisticas();
+                                } else {
+                                    Toast.fire({
+                                        icon: 'error',
+                                        title: response.message || 'Error al eliminar la venta'
+                                    });
+                                }
+                            })
+                            .fail(function() {
+                                Toast.fire({
+                                    icon: 'error',
+                                    title: 'Error de conexión al eliminar la venta'
+                                });
+                            });
+                    }
+                });
+            }
+        });
+    }
+
+    // Función para eliminar un pago específico con doble confirmación
+    window.eliminarPago = function(pagoId, monto, fecha) {
+        // Primera confirmación
+        Swal.fire({
+            title: '¿Eliminar pago?',
+            html: `
+                <div class="text-warning mb-3">
+                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                </div>
+                <p>Estás a punto de eliminar este pago:</p>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Fecha:</strong> ${fecha}</p>
+                        <p class="mb-0"><strong>Monto:</strong> $${parseInt(monto).toLocaleString('es-AR')}</p>
+                    </div>
+                </div>
+                <p class="mt-3 text-muted">Esta acción afectará el estado de pago de la venta</p>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#fd7e14',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Continuar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Segunda confirmación más específica
+                Swal.fire({
+                    title: '¡CONFIRMACIÓN FINAL!',
+                    html: `
+                        <div class="text-danger mb-3">
+                            <i class="fas fa-exclamation-circle fa-3x"></i>
+                        </div>
+                        <p><strong>¿Estás absolutamente seguro?</strong></p>
+                        <div class="alert alert-danger text-start">
+                            <h6 class="alert-heading">Esta acción:</h6>
+                            <ul class="mb-0">
+                                <li>Eliminará el pago de <strong>$${parseInt(monto).toLocaleString('es-AR')}</strong></li>
+                                <li>Aumentará el monto adeudado de la venta</li>
+                                <li>Cambiará el estado de pago si es necesario</li>
+                                <li><strong>NO se puede deshacer</strong></li>
+                            </ul>
+                        </div>
+                    `,
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'SÍ, ELIMINAR DEFINITIVAMENTE',
+                    cancelButtonText: 'No, cancelar',
+                    focusCancel: true
+                }).then((finalResult) => {
+                    if (finalResult.isConfirmed) {
+                        // Proceder con la eliminación
+                        eliminarPagoConfirmado(pagoId);
+                    }
+                });
+            }
+        });
+    };
+
+    // Función para ejecutar la eliminación del pago
+    function eliminarPagoConfirmado(pagoId) {
+        $.ajax({
+            url: 'controllers/eliminar_pago.php',
+            method: 'POST',
+            data: { pago_id: pagoId },
+            dataType: 'json'
+        })
+        .done(function(response) {
+            if (response.success) {
+                Swal.fire({
+                    title: '¡Pago Eliminado!',
+                    text: response.message,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+                // Recargar el modal de pagos con los datos actualizados
+                const ventaId = $('#pagoVentaId').val();
+                gestionarPagosFuncion(ventaId);
+                
+                // Recargar la tabla principal
+                tabla.ajax.reload();
+                cargarEstadisticas();
+            } else {
+                Toast.fire({
+                    icon: 'error',
+                    title: response.message || 'Error al eliminar el pago'
+                });
+            }
+        })
+        .fail(function() {
+            Toast.fire({
+                icon: 'error',
+                title: 'Error de conexión al eliminar el pago'
+            });
+        });
+    }
 
     // Inicialización
     inicializarTabla();
