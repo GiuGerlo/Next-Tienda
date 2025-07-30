@@ -486,7 +486,7 @@ p {
 }
 
 .table thead th {
-    background-color: var(--color-primary);
+    background-color: var(--bs-gray-600);
     color: var(--color-dark);
     font-weight: 600;
     text-transform: uppercase;
