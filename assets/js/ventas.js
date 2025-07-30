@@ -1475,6 +1475,94 @@ $(document).ready(function() {
         });
     }
 
+    // Función para exportar a Excel
+    function exportarExcel() {
+        // Verificar si hay datos en la tabla
+        if (tabla.data().count() === 0) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Sin datos para exportar',
+                text: 'No hay ventas que coincidan con los filtros aplicados.',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#6c757d'
+            });
+            return;
+        }
+
+        // Obtener filtros actuales
+        const filtros = {
+            fecha_desde: $('#filtroFechaDesde').val(),
+            fecha_hasta: $('#filtroFechaHasta').val(),
+            estado_pago: $('#filtroEstado').val(),
+            metodo_pago: $('#filtroMetodo').val(),
+            search: tabla.search()
+        };
+
+        // Construir URL con parámetros
+        const params = new URLSearchParams();
+        Object.keys(filtros).forEach(key => {
+            if (filtros[key]) {
+                params.append(key, filtros[key]);
+            }
+        });
+
+        const url = 'controllers/exportar_excel.php?' + params.toString();
+        
+        // Mostrar loading con SweetAlert más elegante
+        Swal.fire({
+            title: 'Generando Reporte Excel',
+            html: `
+                <div style="text-align: center;">
+                    <i class="fas fa-file-excel fa-3x" style="color: #28a745; margin-bottom: 20px;"></i>
+                    <p>Preparando el reporte de ventas...</p>
+                    <div class="progress" style="height: 20px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                             role="progressbar" style="width: 100%"></div>
+                    </div>
+                </div>
+            `,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // Crear enlace temporal para descarga
+        const link = document.createElement('a');
+        link.href = url;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Mostrar confirmación después de un momento
+        setTimeout(() => {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Reporte Generado!',
+                html: `
+                    <div style="text-align: center;">
+                        <i class="fas fa-download fa-2x" style="color: #28a745; margin-bottom: 15px;"></i>
+                        <p>El archivo Excel ha sido descargado exitosamente.</p>
+                        <p style="font-size: 0.9em; color: #6c757d;">
+                            <strong>Ventas incluidas:</strong> ${tabla.page.info().recordsDisplay} registros
+                        </p>
+                    </div>
+                `,
+                confirmButtonText: 'Perfecto',
+                confirmButtonColor: '#28a745',
+                timer: 4000,
+                timerProgressBar: true
+            });
+        }, 1500);
+    }
+
+    // Event listener para el botón de exportar Excel
+    $('#btnExportarExcel').on('click', function() {
+        exportarExcel();
+    });
+
     // Inicialización
     inicializarTabla();
     cargarEstadisticas();

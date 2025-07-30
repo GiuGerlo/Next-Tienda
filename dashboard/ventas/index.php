@@ -114,9 +114,16 @@ include '../../includes/header.php';
                                 </h5>
                             </div>
                             <div class="col-6 text-end">
-                                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#filtrosVentas">
-                                    <i class="fas fa-filter me-1"></i>Filtros</small>
-                                </button>
+                                <div class="btn-group-header text-right">
+                                    <button class="btn btn-success btn-sm" id="btnExportarExcel" title="Exportar a Excel">
+                                        <i class="fas fa-file-excel"></i>
+                                        <span class="d-none d-md-inline">Excel</span>
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="collapse" data-bs-target="#filtrosVentas">
+                                        <i class="fas fa-filter"></i>
+                                        <span class="d-none d-md-inline">Filtros</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         
