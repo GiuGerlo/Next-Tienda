@@ -44,7 +44,7 @@ function getDashboardStats($pdo)
         $stats['ingresos_mes'] = $ventasData['total_ingresos'];
 
         // Total de préstamos activos
-        $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM prestamos WHERE estado = 'activo'");
+        $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM prestamos WHERE estado IN ('pendiente', 'parcial')");
         $stmt->execute();
         $stats['prestamos_activos'] = $stmt->fetchColumn();
 
@@ -52,6 +52,11 @@ function getDashboardStats($pdo)
         $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM usuarios WHERE activo = TRUE");
         $stmt->execute();
         $stats['total_usuarios'] = $stmt->fetchColumn();
+
+        // Productos en préstamo
+        $stmt = $pdo->prepare("SELECT COALESCE(SUM(productos_pendientes), 0) as total FROM prestamos WHERE estado IN ('pendiente', 'parcial')");
+        $stmt->execute();
+        $stats['productos_en_prestamo'] = $stmt->fetchColumn();
 
         // Ventas de los últimos 7 días
         $stmt = $pdo->prepare("
@@ -66,9 +71,9 @@ function getDashboardStats($pdo)
 
         // Préstamos pendientes
         $stmt = $pdo->prepare("
-            SELECT cliente_nombre, total, fecha_prestamo, estado
+            SELECT cliente_nombre, total_productos, fecha_prestamo, estado, productos_pendientes
             FROM prestamos 
-            WHERE estado IN ('activo', 'vencido')
+            WHERE estado IN ('pendiente', 'parcial', 'vencido')
             ORDER BY fecha_prestamo DESC
             LIMIT 5
         ");
@@ -81,6 +86,7 @@ function getDashboardStats($pdo)
             'ventas_mes' => 0,
             'ingresos_mes' => 0,
             'prestamos_activos' => 0,
+            'productos_en_prestamo' => 0,
             'total_usuarios' => 0,
             'ventas_recientes' => [],
             'prestamos_pendientes' => []
@@ -163,6 +169,24 @@ include '../includes/header.php';
                 </div>
             </div>
 
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card products-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3 class="stats-number"><?= number_format($stats['productos_en_prestamo']) ?></h3>
+                        <p class="stats-label">Productos en préstamo</p>
+                        <span class="stats-trend neutral">
+                            <i class="fas fa-clock"></i> Pendientes
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Segunda fila de estadísticas -->
+        <div class="row g-4 mb-4">
             <div class="col-lg-3 col-md-6">
                 <div class="stats-card users-card">
                     <div class="stats-icon">
@@ -247,10 +271,10 @@ include '../includes/header.php';
                                     <div class="loan-item">
                                         <div class="loan-info">
                                             <h6 class="loan-client"><?= htmlspecialchars($prestamo['cliente_nombre']) ?></h6>
-                                            <p class="loan-amount">$<?= number_format($prestamo['total'], 0, ',', '.') ?></p>
+                                            <p class="loan-amount"><?= $prestamo['total_productos'] ?> productos (<?= $prestamo['productos_pendientes'] ?> pendientes)</p>
                                         </div>
                                         <div class="loan-status">
-                                            <span class="badge bg-<?= $prestamo['estado'] === 'vencido' ? 'danger' : 'warning' ?>">
+                                            <span class="badge bg-<?= $prestamo['estado'] === 'vencido' ? 'danger' : ($prestamo['estado'] === 'parcial' ? 'info' : 'warning') ?>">
                                                 <?= ucfirst($prestamo['estado']) ?>
                                             </span>
                                             <small class="text-muted d-block">
