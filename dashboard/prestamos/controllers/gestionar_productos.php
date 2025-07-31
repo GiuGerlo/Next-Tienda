@@ -56,13 +56,21 @@ try {
 
     switch ($accion) {
         case 'devolver':
+            // Configurar timezone de Argentina para la fecha de devolución
+            $timezone_argentina = new DateTimeZone('America/Argentina/Buenos_Aires');
+            $fecha_actual = new DateTime('now', $timezone_argentina);
+            $fecha_devolucion = $fecha_actual->format('Y-m-d H:i:s');
+            
             // Marcar producto como devuelto
             $sql = "UPDATE detalle_prestamos 
                     SET estado_producto = 'devuelto', 
-                        fecha_devolucion = NOW()
+                        fecha_devolucion = :fecha_devolucion
                     WHERE id = :id";
             $stmt = $pdo->prepare($sql);
-            $stmt->execute([':id' => $detalle_id]);
+            $stmt->execute([
+                ':fecha_devolucion' => $fecha_devolucion,
+                ':id' => $detalle_id
+            ]);
             
             $mensaje = 'Producto marcado como devuelto';
             break;
@@ -89,13 +97,19 @@ try {
 
             $monto_adeudado = $total_producto - $monto_pagado;
 
+            // Configurar timezone de Argentina para la fecha de venta
+            $timezone_argentina = new DateTimeZone('America/Argentina/Buenos_Aires');
+            $fecha_actual = new DateTime('now', $timezone_argentina);
+            $fecha_venta = $fecha_actual->format('Y-m-d H:i:s');
+
             // Crear venta desde el préstamo
             $sql = "INSERT INTO ventas (cliente_nombre, fecha_venta, subtotal, total, metodo_pago, estado_pago, monto_pagado, monto_adeudado, observaciones, usuario_id) 
-                    VALUES (:cliente_nombre, CURDATE(), :subtotal, :total, :metodo_pago, :estado_pago, :monto_pagado, :monto_adeudado, :observaciones, :usuario_id)";
+                    VALUES (:cliente_nombre, :fecha_venta, :subtotal, :total, :metodo_pago, :estado_pago, :monto_pagado, :monto_adeudado, :observaciones, :usuario_id)";
             
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ':cliente_nombre' => $producto['cliente_nombre'],
+                ':fecha_venta' => $fecha_venta,
                 ':subtotal' => $total_producto,
                 ':total' => $total_producto,
                 ':metodo_pago' => $metodo_pago,
@@ -125,13 +139,14 @@ try {
             // Si hay un pago, registrarlo
             if ($monto_pagado > 0) {
                 $sql = "INSERT INTO pagos_ventas (venta_id, monto, metodo_pago, fecha_pago, observaciones, usuario_id) 
-                        VALUES (:venta_id, :monto, :metodo_pago, NOW(), :observaciones, :usuario_id)";
+                        VALUES (:venta_id, :monto, :metodo_pago, :fecha_pago, :observaciones, :usuario_id)";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
                     ':venta_id' => $venta_id,
                     ':monto' => $monto_pagado,
                     ':metodo_pago' => $metodo_pago,
+                    ':fecha_pago' => $fecha_venta,
                     ':observaciones' => 'Pago inicial de compra desde préstamo',
                     ':usuario_id' => $_SESSION['user_id']
                 ]);
@@ -140,11 +155,12 @@ try {
             // Actualizar producto del préstamo
             $sql = "UPDATE detalle_prestamos 
                     SET estado_producto = 'comprado', 
-                        fecha_compra = NOW(), 
+                        fecha_compra = :fecha_compra, 
                         venta_id = :venta_id
                     WHERE id = :id";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
+                ':fecha_compra' => $fecha_venta,
                 ':venta_id' => $venta_id,
                 ':id' => $detalle_id
             ]);

@@ -36,9 +36,11 @@ try {
     $fechaDesde = $_GET['fecha_desde'] ?? '';
     $fechaHasta = $_GET['fecha_hasta'] ?? '';
     $estado = $_GET['estado'] ?? '';
+    $cliente = $_GET['cliente'] ?? '';
+    $soloVencidos = $_GET['vencidos'] ?? '';
     
     // Log para debug
-    error_log("Filtros aplicados - Desde: $fechaDesde, Hasta: $fechaHasta, Estado: $estado");
+    error_log("Filtros aplicados - Desde: $fechaDesde, Hasta: $fechaHasta, Estado: $estado, Cliente: $cliente, Vencidos: $soloVencidos");
     
     // Ordenamiento
     $orderColumn = intval($_GET['order'][0]['column'] ?? 0);
@@ -77,6 +79,15 @@ try {
         $params[':estado'] = $estado;
     }
     
+    if (!empty($cliente)) {
+        $baseQuery .= " AND p.cliente_nombre LIKE :cliente";
+        $params[':cliente'] = "%$cliente%";
+    }
+    
+    if (!empty($soloVencidos) && $soloVencidos === 'true') {
+        $baseQuery .= " AND p.fecha_limite IS NOT NULL AND p.fecha_limite < CURDATE() AND p.estado IN ('pendiente', 'parcial')";
+    }
+    
     // Contar total de registros
     $countQuery = "SELECT COUNT(*) as total " . $baseQuery;
     $stmt = $pdo->prepare($countQuery);
@@ -88,9 +99,11 @@ try {
         SELECT 
             p.id,
             p.cliente_nombre,
-            DATE_FORMAT(p.fecha_prestamo, '%d/%m/%Y') as fecha_prestamo_formato,
+            DATE_FORMAT(p.fecha_prestamo, '%d/%m/%Y %H:%i') as fecha_prestamo_formato,
+            DATE_FORMAT(p.fecha_prestamo, '%Y-%m-%d') as fecha_prestamo_input,
             p.fecha_prestamo,
             DATE_FORMAT(p.fecha_limite, '%d/%m/%Y') as fecha_limite_formato,
+            DATE_FORMAT(p.fecha_limite, '%Y-%m-%d') as fecha_limite_input,
             p.fecha_limite,
             p.estado,
             p.total_productos,
@@ -167,22 +180,19 @@ try {
         // Botones de acción
         $acciones = '
             <div class="btn-group" role="group">
-                <button class="btn btn-sm btn-outline-primary" onclick="verPrestamo(' . $prestamo['id'] . ')" title="Ver detalles">
+                <button type="button" class="btn btn-accion btn-ver btn-sm" 
+                        onclick="verPrestamo(' . $prestamo['id'] . ')" 
+                        title="Ver detalles">
                     <i class="fas fa-eye"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-success" onclick="gestionarProductos(' . $prestamo['id'] . ')" title="Gestionar productos">
+                <button type="button" class="btn btn-accion btn-gestionar btn-sm" 
+                        onclick="gestionarProductos(' . $prestamo['id'] . ')" 
+                        title="Gestionar productos">
                     <i class="fas fa-tasks"></i>
-                </button>';
-        
-        if ($prestamo['estado_calculado'] != 'finalizado') {
-            $acciones .= '
-                <button class="btn btn-sm btn-outline-warning" onclick="editarPrestamo(' . $prestamo['id'] . ')" title="Editar">
-                    <i class="fas fa-edit"></i>
-                </button>';
-        }
-        
-        $acciones .= '
-                <button class="btn btn-sm btn-outline-danger" onclick="eliminarPrestamo(' . $prestamo['id'] . ')" title="Eliminar">
+                </button>
+                <button type="button" class="btn btn-accion btn-eliminar btn-sm" 
+                        onclick="eliminarPrestamo(' . $prestamo['id'] . ')" 
+                        title="Eliminar">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>

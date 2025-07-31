@@ -13,6 +13,48 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
+/* Autocompletado de cliente */
+.suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ced4da;
+    border-top: none;
+    border-radius: 0 0 0.375rem 0.375rem;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.suggestion-item {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.suggestion-item:hover,
+.suggestion-item.active {
+    background-color: #f8f9fa;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-cliente {
+    font-weight: 500;
+    color: #495057;
+}
+
+.suggestion-detalle {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
 /* Estados de préstamos */
 .badge.bg-warning {
     background-color: #ffc107 !important;
@@ -82,6 +124,61 @@
 
 .btn-group .btn:last-child {
     margin-right: 0;
+}
+
+/* Estilos de botones de acción (igual que ventas) */
+.btn-accion {
+    padding: 0.375rem 0.5rem;
+    margin: 0 0.125rem;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-accion:hover {
+    transform: translateY(-1px);
+}
+
+.btn-ver {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn-ver:hover {
+    background-color: #138496;
+    color: white;
+}
+
+.btn-editar {
+    background-color: #0969da;
+    color: white;
+}
+
+.btn-editar:hover {
+    background-color: #0550ae;
+    color: white;
+}
+
+.btn-gestionar {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-gestionar:hover {
+    background-color: #218838;
+    color: white;
+}
+
+.btn-eliminar {
+    background-color: #d1242f;
+    color: white;
+}
+
+.btn-eliminar:hover {
+    background-color: #a40e26;
+    color: white;
 }
 
 /* Filtros */

@@ -24,6 +24,8 @@ $additional_css = '
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <!-- CSS personalizado para préstamos -->
     <link rel="stylesheet" href="../../assets/css/prestamos.css">
+    <!-- CSS para notificaciones -->
+    <link rel="stylesheet" href="../../assets/css/notificaciones.css">
 ';
 
 // Incluir header
@@ -64,15 +66,22 @@ include '../../includes/header.php';
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label for="filtro_fecha_desde" class="form-label">Desde</label>
                                 <input type="date" class="form-control" id="filtro_fecha_desde">
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <label for="filtro_fecha_hasta" class="form-label">Hasta</label>
                                 <input type="date" class="form-control" id="filtro_fecha_hasta">
                             </div>
                             <div class="col-md-3">
+                                <label for="filtro_cliente" class="form-label">Cliente</label>
+                                <div class="position-relative">
+                                    <input type="text" class="form-control" id="filtro_cliente" placeholder="Buscar cliente...">
+                                    <div id="sugerencias_cliente" class="suggestions-dropdown"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
                                 <label for="filtro_estado" class="form-label">Estado</label>
                                 <select class="form-select" id="filtro_estado">
                                     <option value="">Todos los estados</option>
@@ -82,7 +91,16 @@ include '../../includes/header.php';
                                     <option value="vencido">Vencido</option>
                                 </select>
                             </div>
-                            <div class="col-md-3 d-flex align-items-end">
+                            <div class="col-md-1">
+                                <label for="filtro_vencidos" class="form-label">Vencidos</label>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="filtro_vencidos">
+                                    <label class="form-check-label" for="filtro_vencidos">
+                                        <small>Solo vencidos</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
                                 <button type="button" class="btn btn-outline-secondary me-2" id="limpiar_filtros">
                                     <i class="fas fa-times me-1"></i>Limpiar
                                 </button>
@@ -143,7 +161,6 @@ include '../../includes/header.php';
             </div>
             <div class="modal-body">
                 <form id="formPrestamo">
-                    <input type="hidden" id="prestamo_id" name="prestamo_id">
                     
                     <div class="row">
                         <div class="col-md-6">
@@ -154,7 +171,9 @@ include '../../includes/header.php';
                         </div>
                         <div class="col-md-3">
                             <div class="mb-3">
-                                <label for="fecha_prestamo" class="form-label">Fecha de Préstamo *</label>
+                                <label for="fecha_prestamo" class="form-label">
+                                    Fecha de Préstamo *
+                                </label>
                                 <input type="date" class="form-control" id="fecha_prestamo" name="fecha_prestamo" required>
                             </div>
                         </div>
@@ -260,6 +279,61 @@ include '../../includes/header.php';
     </div>
 </div>
 
+<!-- Modal Convertir a Venta -->
+<div class="modal fade" id="modalConvertirVenta" tabindex="-1" aria-labelledby="modalConvertirVentaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalConvertirVentaLabel">
+                    <i class="fas fa-shopping-cart me-2"></i>Convertir a Venta
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formConvertirVenta">
+                    <input type="hidden" id="detalle_id_venta" name="detalle_id">
+                    <input type="hidden" id="prestamo_id_venta" name="prestamo_id">
+                    <input type="hidden" id="total_producto_venta" name="total_producto">
+                    
+                    <div class="mb-3">
+                        <label for="metodo_pago_venta" class="form-label">Método de Pago:</label>
+                        <select id="metodo_pago_venta" name="metodo_pago" class="form-select" required>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="tarjeta_debito">Tarjeta de Débito</option>
+                            <option value="tarjeta_credito">Tarjeta de Crédito</option>
+                            <option value="transferencia">Transferencia</option>
+                            <option value="cuenta_corriente">Cuenta Corriente</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="estado_pago_venta" class="form-label">Estado del Pago:</label>
+                        <select id="estado_pago_venta" name="estado_pago" class="form-select" required>
+                            <option value="completo">Pago Completo</option>
+                            <option value="parcial">Pago Parcial</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="div_monto_pagado_venta" style="display: none;">
+                        <label for="monto_pagado_venta" class="form-label">Monto Pagado:</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" id="monto_pagado_venta" name="monto_pagado" class="form-control" min="0.01" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-text">Total: $<span id="total_mostrar_venta">0.00</span></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmarConversionVenta">
+                    <i class="fas fa-check me-1"></i>Confirmar Compra
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php 
 // JavaScript adicional para préstamos
 $additional_js = '
@@ -272,6 +346,8 @@ $additional_js = '
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
     <!-- SweetAlert JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <!-- JS para notificaciones -->
+    <script src="../../assets/js/notificaciones.js"></script>
     <!-- JS personalizado para préstamos -->
     <script src="../../assets/js/prestamos.js"></script>
 ';

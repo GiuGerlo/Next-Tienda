@@ -5,7 +5,19 @@
 // Variables globales
 let tabla;
 let contadorProductos = 0;
-let prestamoEnEdicion = null;
+
+// Configuración de SweetAlert Toast (igual que ventas)
+const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer);
+        toast.addEventListener('mouseleave', Swal.resumeTimer);
+    }
+});
 
 // Verificar que todas las librerías estén cargadas y entonces inicializar
 function esperarLibrerias(callback) {
@@ -40,6 +52,8 @@ function inicializarTabla() {
                 d.fecha_desde = $('#filtro_fecha_desde').val();
                 d.fecha_hasta = $('#filtro_fecha_hasta').val();
                 d.estado = $('#filtro_estado').val();
+                d.cliente = $('#filtro_cliente').val();
+                d.vencidos = $('#filtro_vencidos').is(':checked') ? 'true' : '';
             }
         },
         columns: [
@@ -63,6 +77,18 @@ function inicializarTabla() {
         drawCallback: function() {
             // Reinicializar tooltips después de cada redibujado
             $('[data-bs-toggle="tooltip"]').tooltip();
+            
+            // Agregar clases para préstamos vencidos
+            $('#tabla-prestamos tbody tr').each(function() {
+                const row = $(this);
+                const estadoCell = row.find('td:eq(3)');
+                
+                if (estadoCell.find('.badge.bg-danger').length > 0) {
+                    row.addClass('table-danger');
+                } else if (estadoCell.find('.badge.bg-warning').length > 0) {
+                    row.addClass('table-warning');
+                }
+            });
         }
     });
 }
@@ -79,9 +105,14 @@ function inicializarEventos() {
     $('#limpiar_filtros').on('click', function() {
         $('#filtro_fecha_desde').val('');
         $('#filtro_fecha_hasta').val('');
+        $('#filtro_cliente').val('');
         $('#filtro_estado').val('');
+        $('#filtro_vencidos').prop('checked', false);
         tabla.ajax.reload();
     });
+
+    // Autocompletado de cliente
+    inicializarAutocompletado();
 
     // Nuevo préstamo
     $('#modalPrestamo').on('show.bs.modal', function() {
@@ -109,14 +140,229 @@ function inicializarEventos() {
         calcularSubtotal($(this).closest('tr'));
         calcularTotal();
     });
+
+    // Eventos para modal de conversión a venta
+    $('#estado_pago_venta').on('change', function() {
+        const divMonto = $('#div_monto_pagado_venta');
+        const inputMonto = $('#monto_pagado_venta');
+        const total = parseFloat($('#total_producto_venta').val());
+        
+        if ($(this).val() === 'parcial') {
+            divMonto.show();
+            inputMonto.attr('required', true);
+            inputMonto.attr('max', total);
+            setTimeout(() => {
+                inputMonto.focus();
+            }, 100);
+        } else {
+            divMonto.hide();
+            inputMonto.removeAttr('required');
+            inputMonto.val('');
+        }
+    });
+
+    // Confirmar conversión a venta
+    $('#confirmarConversionVenta').on('click', function() {
+        const form = $('#formConvertirVenta')[0];
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        const estadoPago = $('#estado_pago_venta').val();
+        const montoPagado = $('#monto_pagado_venta').val();
+        const total = parseFloat($('#total_producto_venta').val());
+
+        // Validaciones adicionales
+        if (estadoPago === 'parcial') {
+            if (!montoPagado || parseFloat(montoPagado) <= 0) {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Debe especificar un monto válido mayor a 0'
+                });
+                return;
+            }
+            
+            if (parseFloat(montoPagado) > total) {
+                Toast.fire({
+                    icon: 'error',
+                    title: `El monto no puede ser mayor al total ($${total.toFixed(2)})`
+                });
+                return;
+            }
+        }
+
+        // Obtener datos
+        const datosVenta = {
+            metodo_pago: $('#metodo_pago_venta').val(),
+            estado_pago: estadoPago,
+            monto_pagado: estadoPago === 'parcial' ? parseFloat(montoPagado) : total
+        };
+
+        const detalleId = $('#detalle_id_venta').val();
+        const prestamoId = $('#prestamo_id_venta').val();
+
+        // Cerrar modal y procesar
+        $('#modalConvertirVenta').modal('hide');
+        procesarAccionProducto('comprar', detalleId, prestamoId, datosVenta);
+    });
+}
+
+/**
+ * Inicializar autocompletado de clientes
+ */
+function inicializarAutocompletado() {
+    let timeoutId;
+    const inputCliente = $('#filtro_cliente');
+    const sugerenciasContainer = $('#sugerencias_cliente');
+    
+    inputCliente.on('input', function() {
+        const termino = $(this).val().trim();
+        
+        clearTimeout(timeoutId);
+        
+        if (termino.length < 2) {
+            sugerenciasContainer.hide().empty();
+            return;
+        }
+        
+        timeoutId = setTimeout(() => {
+            buscarClientes(termino);
+        }, 300);
+    });
+    
+    // Cerrar sugerencias al hacer click fuera
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('#filtro_cliente, #sugerencias_cliente').length) {
+            sugerenciasContainer.hide();
+        }
+    });
+    
+    // Navegación con teclado
+    inputCliente.on('keydown', function(e) {
+        const items = sugerenciasContainer.find('.suggestion-item');
+        const activeItem = items.filter('.active');
+        
+        switch(e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                if (activeItem.length === 0) {
+                    items.first().addClass('active');
+                } else {
+                    const nextItem = activeItem.removeClass('active').next('.suggestion-item');
+                    if (nextItem.length) {
+                        nextItem.addClass('active');
+                    } else {
+                        items.first().addClass('active');
+                    }
+                }
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                if (activeItem.length === 0) {
+                    items.last().addClass('active');
+                } else {
+                    const prevItem = activeItem.removeClass('active').prev('.suggestion-item');
+                    if (prevItem.length) {
+                        prevItem.addClass('active');
+                    } else {
+                        items.last().addClass('active');
+                    }
+                }
+                break;
+                
+            case 'Enter':
+                e.preventDefault();
+                if (activeItem.length) {
+                    seleccionarCliente(activeItem.data('nombre'));
+                }
+                break;
+                
+            case 'Escape':
+                sugerenciasContainer.hide();
+                break;
+        }
+    });
+}
+
+/**
+ * Buscar clientes para autocompletado
+ */
+function buscarClientes(termino) {
+    $.get('controllers/buscar_clientes.php', { q: termino })
+        .done(function(response) {
+            if (response.success) {
+                mostrarSugerenciasClientes(response.clientes);
+            }
+        })
+        .fail(function() {
+            console.error('Error al buscar clientes');
+        });
+}
+
+/**
+ * Mostrar sugerencias de clientes
+ */
+function mostrarSugerenciasClientes(clientes) {
+    const sugerenciasContainer = $('#sugerencias_cliente');
+    
+    if (clientes.length === 0) {
+        sugerenciasContainer.hide();
+        return;
+    }
+    
+    let html = '';
+    clientes.forEach(cliente => {
+        const iconClass = cliente.prestamos_activos > 0 ? 'fas fa-exclamation-circle text-warning' : 
+                         cliente.tiene_prestamos ? 'fas fa-history text-info' : 'fas fa-user text-muted';
+        
+        html += `
+            <div class="suggestion-item" data-nombre="${cliente.nombre}">
+                <div class="suggestion-cliente">
+                    <i class="${iconClass} me-2"></i>
+                    ${cliente.nombre}
+                </div>
+                <div class="suggestion-detalle">${cliente.detalle}</div>
+            </div>
+        `;
+    });
+    
+    sugerenciasContainer.html(html).show();
+    
+    // Agregar evento click a las sugerencias
+    sugerenciasContainer.find('.suggestion-item').on('click', function() {
+        const nombre = $(this).data('nombre');
+        seleccionarCliente(nombre);
+    });
+}
+
+/**
+ * Seleccionar cliente del autocompletado
+ */
+function seleccionarCliente(nombre) {
+    $('#filtro_cliente').val(nombre);
+    $('#sugerencias_cliente').hide();
+    
+    // Aplicar filtro automáticamente
+    tabla.ajax.reload();
 }
 
 /**
  * Configurar fechas por defecto
  */
 function configurarFechasPorDefecto() {
-    const hoy = new Date().toISOString().split('T')[0];
-    $('#fecha_prestamo').val(hoy);
+    // Configurar fecha actual en zona horaria argentina
+    const ahora = new Date();
+    // Ajustar a zona horaria argentina (UTC-3)
+    const offsetArgentina = -3 * 60; // minutos
+    const offsetLocal = ahora.getTimezoneOffset();
+    const offsetDiferencia = offsetArgentina - offsetLocal;
+    const fechaArgentina = new Date(ahora.getTime() + (offsetDiferencia * 60 * 1000));
+    
+    // Formatear para input date (YYYY-MM-DD)
+    const fechaFormatted = fechaArgentina.toISOString().split('T')[0];
+    $('#fecha_prestamo').val(fechaFormatted);
 }
 
 /**
@@ -124,12 +370,10 @@ function configurarFechasPorDefecto() {
  */
 function limpiarFormulario() {
     $('#formPrestamo')[0].reset();
-    $('#prestamo_id').val('');
     $('#productosContainer').empty();
     $('#totalPrestamo').text('0.00');
     $('#modalPrestamoLabel').html('<i class="fas fa-handshake me-2"></i>Nuevo Préstamo');
     contadorProductos = 0;
-    prestamoEnEdicion = null;
     configurarFechasPorDefecto();
 }
 
@@ -229,21 +473,17 @@ function guardarPrestamo() {
             ocultarLoading();
             
             if (response.success) {
-                Swal.fire({
+                Toast.fire({
                     icon: 'success',
-                    title: '¡Éxito!',
-                    text: response.message,
-                    showConfirmButton: false,
-                    timer: 2000
+                    title: response.message
                 });
                 
                 $('#modalPrestamo').modal('hide');
                 tabla.ajax.reload();
             } else {
-                Swal.fire({
+                Toast.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: response.message
+                    title: response.message
                 });
             }
         },
@@ -309,7 +549,7 @@ function verPrestamo(id) {
     mostrarLoading();
 
     $.ajax({
-        url: 'controllers/obtener_prestamo.php',
+        url: 'controllers/obtener_detalle_prestamo.php',
         type: 'POST',
         data: { prestamo_id: id },
         success: function(response) {
@@ -446,7 +686,7 @@ function gestionarProductos(id) {
     mostrarLoading();
 
     $.ajax({
-        url: 'controllers/obtener_prestamo.php',
+        url: 'controllers/obtener_detalle_prestamo.php',
         type: 'POST',
         data: { prestamo_id: id },
         success: function(response) {
@@ -539,68 +779,22 @@ function devolverProducto(detalleId, prestamoId) {
  * Comprar producto
  */
 function comprarProducto(detalleId, prestamoId, total) {
-    Swal.fire({
-        title: 'Convertir a Venta',
-        html: `
-            <div class="text-start">
-                <div class="mb-3">
-                    <label class="form-label">Método de Pago:</label>
-                    <select id="metodo_pago_compra" class="form-select">
-                        <option value="efectivo">Efectivo</option>
-                        <option value="tarjeta_debito">Tarjeta de Débito</option>
-                        <option value="tarjeta_credito">Tarjeta de Crédito</option>
-                        <option value="transferencia">Transferencia</option>
-                        <option value="cuenta_corriente">Cuenta Corriente</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Estado del Pago:</label>
-                    <select id="estado_pago_compra" class="form-select">
-                        <option value="completo">Pago Completo</option>
-                        <option value="parcial">Pago Parcial</option>
-                    </select>
-                </div>
-                <div class="mb-3" id="div_monto_pagado" style="display: none;">
-                    <label class="form-label">Monto Pagado:</label>
-                    <input type="number" id="monto_pagado_compra" class="form-control" min="0" max="${total}" step="0.01">
-                    <small class="text-muted">Total: $${total.toFixed(2)}</small>
-                </div>
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: 'Confirmar Compra',
-        cancelButtonText: 'Cancelar',
-        didOpen: () => {
-            $('#estado_pago_compra').on('change', function() {
-                if ($(this).val() === 'parcial') {
-                    $('#div_monto_pagado').show();
-                    $('#monto_pagado_compra').attr('required', true);
-                } else {
-                    $('#div_monto_pagado').hide();
-                    $('#monto_pagado_compra').attr('required', false);
-                }
-            });
-        },
-        preConfirm: () => {
-            const estadoPago = $('#estado_pago_compra').val();
-            const montoPagado = $('#monto_pagado_compra').val();
-
-            if (estadoPago === 'parcial' && (!montoPagado || montoPagado <= 0)) {
-                Swal.showValidationMessage('Debe especificar el monto pagado');
-                return false;
-            }
-
-            return {
-                metodo_pago: $('#metodo_pago_compra').val(),
-                estado_pago: estadoPago,
-                monto_pagado: montoPagado || total
-            };
-        }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            procesarAccionProducto('comprar', detalleId, prestamoId, result.value);
-        }
-    });
+    // Llenar los datos en el modal
+    $('#detalle_id_venta').val(detalleId);
+    $('#prestamo_id_venta').val(prestamoId);
+    $('#total_producto_venta').val(total);
+    $('#total_mostrar_venta').text(total.toFixed(2));
+    
+    // Resetear formulario
+    $('#formConvertirVenta')[0].reset();
+    $('#detalle_id_venta').val(detalleId);
+    $('#prestamo_id_venta').val(prestamoId);
+    $('#total_producto_venta').val(total);
+    $('#div_monto_pagado_venta').hide();
+    $('#monto_pagado_venta').removeAttr('required');
+    
+    // Mostrar modal
+    $('#modalConvertirVenta').modal('show');
 }
 
 /**
@@ -624,12 +818,9 @@ function procesarAccionProducto(accion, detalleId, prestamoId, datosAdicionales 
             ocultarLoading();
             
             if (response.success) {
-                Swal.fire({
+                Toast.fire({
                     icon: 'success',
-                    title: '¡Éxito!',
-                    text: response.message,
-                    showConfirmButton: false,
-                    timer: 2000
+                    title: response.message
                 });
                 
                 $('#modalGestionarProductos').modal('hide');
@@ -645,64 +836,7 @@ function procesarAccionProducto(accion, detalleId, prestamoId, datosAdicionales 
     });
 }
 
-/**
- * Editar préstamo
- */
-function editarPrestamo(id) {
-    mostrarLoading();
 
-    $.ajax({
-        url: 'controllers/obtener_prestamo.php',
-        type: 'POST',
-        data: { prestamo_id: id },
-        success: function(response) {
-            ocultarLoading();
-            
-            if (response.success) {
-                cargarPrestamoEnFormulario(response.prestamo, response.productos);
-            } else {
-                mostrarError(response.message);
-            }
-        },
-        error: function() {
-            ocultarLoading();
-            mostrarError('Error al cargar el préstamo');
-        }
-    });
-}
-
-/**
- * Cargar préstamo en formulario para edición
- */
-function cargarPrestamoEnFormulario(prestamo, productos) {
-    limpiarFormulario();
-    prestamoEnEdicion = prestamo.id;
-
-    // Llenar datos básicos
-    $('#prestamo_id').val(prestamo.id);
-    $('#cliente_nombre').val(prestamo.cliente_nombre);
-    $('#fecha_prestamo').val(prestamo.fecha_prestamo_input);
-    $('#fecha_limite').val(prestamo.fecha_limite_input || '');
-    $('#observaciones').val(prestamo.observaciones || '');
-
-    // Cargar productos (solo los pendientes, los otros ya están procesados)
-    productos.forEach(function(producto) {
-        if (producto.estado_producto === 'pendiente') {
-            agregarFilaProducto();
-            const ultimaFila = $('#productosContainer tr:last');
-            ultimaFila.find('.nombre-producto').val(producto.producto_nombre);
-            ultimaFila.find('.talle-producto').val(producto.talle || '');
-            ultimaFila.find('.cantidad-producto').val(producto.cantidad);
-            ultimaFila.find('.precio-producto').val(producto.precio_unitario);
-            calcularSubtotal(ultimaFila);
-        }
-    });
-
-    calcularTotal();
-
-    $('#modalPrestamoLabel').html('<i class="fas fa-edit me-2"></i>Editar Préstamo #' + prestamo.id);
-    $('#modalPrestamo').modal('show');
-}
 
 /**
  * Eliminar préstamo
@@ -729,12 +863,9 @@ function eliminarPrestamo(id) {
                     ocultarLoading();
                     
                     if (response.success) {
-                        Swal.fire({
+                        Toast.fire({
                             icon: 'success',
-                            title: '¡Eliminado!',
-                            text: response.message,
-                            showConfirmButton: false,
-                            timer: 2000
+                            title: response.message
                         });
                         
                         tabla.ajax.reload();
@@ -767,10 +898,9 @@ function obtenerColorEstado(estado) {
 }
 
 function mostrarError(mensaje) {
-    Swal.fire({
+    Toast.fire({
         icon: 'error',
-        title: 'Error',
-        text: mensaje
+        title: mensaje
     });
 }
 
@@ -795,5 +925,4 @@ window.verPrestamo = verPrestamo;
 window.gestionarProductos = gestionarProductos;
 window.devolverProducto = devolverProducto;
 window.comprarProducto = comprarProducto;
-window.editarPrestamo = editarPrestamo;
 window.eliminarPrestamo = eliminarPrestamo;

@@ -31,7 +31,6 @@ try {
     }
 
     // Obtener datos del formulario
-    $prestamo_id = $_POST['prestamo_id'] ?? null;
     $cliente_nombre = trim($_POST['cliente_nombre'] ?? '');
     $fecha_prestamo = $_POST['fecha_prestamo'] ?? '';
     $fecha_limite = $_POST['fecha_limite'] ?? null;
@@ -52,8 +51,22 @@ try {
     }
 
     // Validar fecha límite si se proporciona
-    if (!empty($fecha_limite) && $fecha_limite < $fecha_prestamo) {
+    if (!empty($fecha_limite) && $fecha_limite < date('Y-m-d', strtotime($fecha_prestamo))) {
         throw new Exception('La fecha límite no puede ser anterior a la fecha del préstamo');
+    }
+
+    // Convertir fecha_prestamo a DATETIME con zona horaria argentina
+    // Configurar timezone de Argentina
+    $timezone_argentina = new DateTimeZone('America/Argentina/Buenos_Aires');
+    
+    // Si la fecha es de hoy y no se especificó hora, usar hora actual argentina
+    if (date('Y-m-d', strtotime($fecha_prestamo)) === date('Y-m-d')) {
+        $fecha_actual = new DateTime('now', $timezone_argentina);
+        $fecha_prestamo_dt = $fecha_actual->format('Y-m-d H:i:s');
+    } else {
+        // Para fechas diferentes a hoy, usar las 00:00:00 en horario argentino
+        $fecha_dt = new DateTime($fecha_prestamo . ' 00:00:00', $timezone_argentina);
+        $fecha_prestamo_dt = $fecha_dt->format('Y-m-d H:i:s');
     }
 
     // Validar productos
@@ -76,65 +89,20 @@ try {
 
     $usuario_id = $_SESSION['user_id'];
 
-    if (empty($prestamo_id)) {
-        // CREAR NUEVO PRÉSTAMO
-        $sql = "INSERT INTO prestamos (cliente_nombre, fecha_prestamo, fecha_limite, observaciones, usuario_id) 
-                VALUES (:cliente_nombre, :fecha_prestamo, :fecha_limite, :observaciones, :usuario_id)";
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':cliente_nombre' => $cliente_nombre,
-            ':fecha_prestamo' => $fecha_prestamo,
-            ':fecha_limite' => $fecha_limite ?: null,
-            ':observaciones' => $observaciones,
-            ':usuario_id' => $usuario_id
-        ]);
-        
-        $prestamo_id = $pdo->lastInsertId();
-        $accion = 'creado';
-        
-    } else {
-        // EDITAR PRÉSTAMO EXISTENTE
-        
-        // Verificar que el préstamo existe y no está finalizado
-        $sql = "SELECT estado FROM prestamos WHERE id = :id";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([':id' => $prestamo_id]);
-        $prestamo_actual = $stmt->fetch();
-        
-        if (!$prestamo_actual) {
-            throw new Exception('El préstamo no existe');
-        }
-        
-        if ($prestamo_actual['estado'] === 'finalizado') {
-            throw new Exception('No se puede editar un préstamo finalizado');
-        }
-        
-        // Actualizar datos del préstamo
-        $sql = "UPDATE prestamos 
-                SET cliente_nombre = :cliente_nombre, 
-                    fecha_prestamo = :fecha_prestamo, 
-                    fecha_limite = :fecha_limite, 
-                    observaciones = :observaciones
-                WHERE id = :id";
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':cliente_nombre' => $cliente_nombre,
-            ':fecha_prestamo' => $fecha_prestamo,
-            ':fecha_limite' => $fecha_limite ?: null,
-            ':observaciones' => $observaciones,
-            ':id' => $prestamo_id
-        ]);
-        
-        // Eliminar productos anteriores que no estén devueltos o comprados
-        $sql = "DELETE FROM detalle_prestamos 
-                WHERE prestamo_id = :prestamo_id AND estado_producto = 'pendiente'";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([':prestamo_id' => $prestamo_id]);
-        
-        $accion = 'actualizado';
-    }
+    // CREAR NUEVO PRÉSTAMO
+    $sql = "INSERT INTO prestamos (cliente_nombre, fecha_prestamo, fecha_limite, observaciones, usuario_id) 
+            VALUES (:cliente_nombre, :fecha_prestamo, :fecha_limite, :observaciones, :usuario_id)";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':cliente_nombre' => $cliente_nombre,
+        ':fecha_prestamo' => $fecha_prestamo_dt,
+        ':fecha_limite' => $fecha_limite ?: null,
+        ':observaciones' => $observaciones,
+        ':usuario_id' => $usuario_id
+    ]);
+    
+    $prestamo_id = $pdo->lastInsertId();
 
     // Insertar productos del préstamo
     $sql = "INSERT INTO detalle_prestamos (prestamo_id, producto_nombre, talle, cantidad, precio_unitario) 
@@ -157,11 +125,11 @@ try {
     $pdo->commit();
 
     // Log de actividad
-    error_log("Préstamo $accion: ID $prestamo_id por usuario " . $_SESSION['user_id']);
+    error_log("Préstamo creado: ID $prestamo_id por usuario " . $_SESSION['user_id']);
 
     echo json_encode([
         'success' => true,
-        'message' => "Préstamo $accion exitosamente",
+        'message' => "Préstamo creado exitosamente",
         'prestamo_id' => $prestamo_id
     ]);
 

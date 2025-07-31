@@ -1,6 +1,6 @@
 <?php
 /**
- * Controlador para obtener datos de un préstamo específico
+ * Controlador para obtener detalles de un préstamo específico
  * Sistema Next - Gestión de Préstamos
  */
 
@@ -30,26 +30,33 @@ try {
         throw new Exception('Método no permitido');
     }
 
+    // Obtener ID del préstamo
     $prestamo_id = $_POST['prestamo_id'] ?? null;
 
     if (empty($prestamo_id)) {
-        throw new Exception('ID de préstamo no proporcionado');
+        throw new Exception('ID del préstamo es obligatorio');
     }
 
     // Obtener datos del préstamo
     $sql = "SELECT 
-                p.*,
-                u.nombre_completo as usuario_nombre,
-                DATE_FORMAT(p.fecha_prestamo, '%Y-%m-%d') as fecha_prestamo_input,
-                DATE_FORMAT(p.fecha_limite, '%Y-%m-%d') as fecha_limite_input,
-                DATE_FORMAT(p.fecha_creacion, '%d/%m/%Y %H:%i') as fecha_creacion_formato
+                p.id,
+                p.cliente_nombre,
+                DATE_FORMAT(p.fecha_prestamo, '%d/%m/%Y %H:%i') as fecha_prestamo,
+                DATE_FORMAT(p.fecha_limite, '%d/%m/%Y') as fecha_limite,
+                p.estado,
+                p.total_productos,
+                p.productos_devueltos,
+                p.productos_comprados,
+                p.productos_pendientes,
+                p.observaciones,
+                u.nombre_completo as usuario_nombre
             FROM prestamos p
             LEFT JOIN usuarios u ON p.usuario_id = u.id
-            WHERE p.id = :id";
-    
+            WHERE p.id = :prestamo_id";
+
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':id' => $prestamo_id]);
-    $prestamo = $stmt->fetch();
+    $stmt->execute([':prestamo_id' => $prestamo_id]);
+    $prestamo = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$prestamo) {
         throw new Exception('Préstamo no encontrado');
@@ -57,28 +64,26 @@ try {
 
     // Obtener productos del préstamo
     $sql = "SELECT 
-                id,
-                producto_nombre,
-                talle,
-                cantidad,
-                precio_unitario,
-                estado_producto,
-                DATE_FORMAT(fecha_devolucion, '%d/%m/%Y %H:%i') as fecha_devolucion_formato,
-                DATE_FORMAT(fecha_compra, '%d/%m/%Y %H:%i') as fecha_compra_formato,
-                venta_id,
-                observaciones
-            FROM detalle_prestamos
-            WHERE prestamo_id = :prestamo_id
-            ORDER BY id";
-    
+                dp.id,
+                dp.producto_nombre,
+                dp.talle,
+                dp.cantidad,
+                dp.precio_unitario,
+                dp.estado_producto,
+                DATE_FORMAT(dp.fecha_devolucion, '%d/%m/%Y %H:%i') as fecha_devolucion_formato,
+                dp.venta_id
+            FROM detalle_prestamos dp
+            WHERE dp.prestamo_id = :prestamo_id
+            ORDER BY dp.id ASC";
+
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':prestamo_id' => $prestamo_id]);
-    $productos = $stmt->fetchAll();
+    $productos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Calcular totales
+    // Calcular valor total referencial
     $total_valor = 0;
     foreach ($productos as $producto) {
-        $total_valor += $producto['cantidad'] * $producto['precio_unitario'];
+        $total_valor += $producto['precio_unitario'] * $producto['cantidad'];
     }
 
     echo json_encode([
@@ -89,7 +94,7 @@ try {
     ]);
 
 } catch (Exception $e) {
-    error_log("Error en obtener_prestamo.php: " . $e->getMessage());
+    error_log("Error en obtener_detalle_prestamo.php: " . $e->getMessage());
     
     echo json_encode([
         'success' => false,

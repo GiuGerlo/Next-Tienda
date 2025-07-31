@@ -1,0 +1,201 @@
+/* ===================================================
+   CSS para Sistema de Notificaciones - Préstamos
+   =================================================== */
+
+/* Badge de notificaciones */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Panel de notificaciones */
+.notifications-panel {
+    position: relative;
+}
+
+.notifications-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    width: 350px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1050;
+    display: none;
+}
+
+.notifications-header {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+}
+
+.notifications-header h6 {
+    margin: 0;
+    color: #495057;
+    font-weight: 600;
+}
+
+.notification-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.notification-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+/* Tipos de notificaciones */
+.notification-vencido {
+    border-left: 4px solid #dc3545;
+    background-color: #fff5f5;
+}
+
+.notification-proximo {
+    border-left: 4px solid #ffc107;
+    background-color: #fffcf5;
+}
+
+.notification-antiguo {
+    border-left: 4px solid #6c757d;
+    background-color: #f8f9fa;
+}
+
+.notification-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.notification-icon.vencido {
+    background-color: #dc3545;
+    color: white;
+}
+
+.notification-icon.proximo {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.notification-icon.antiguo {
+    background-color: #6c757d;
+    color: white;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.notification-text {
+    color: #6c757d;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.notification-time {
+    color: #adb5bd;
+    font-size: 0.75rem;
+}
+
+.notification-actions {
+    margin-top: 0.5rem;
+}
+
+.notification-actions .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    margin-right: 0.25rem;
+}
+
+/* Estado vacío */
+.notifications-empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+.notifications-empty i {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .notifications-dropdown {
+        width: 300px;
+        right: -50px;
+    }
+}
+
+@media (max-width: 576px) {
+    .notifications-dropdown {
+        width: calc(100vw - 2rem);
+        right: -150px;
+    }
+}
+
+/* Animaciones */
+.notification-item {
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Scroll personalizado para el dropdown */
+.notifications-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notifications-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.notifications-dropdown::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.notifications-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
