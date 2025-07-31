@@ -709,6 +709,10 @@ function gestionarProductos(id) {
  * Mostrar gestión de productos en modal
  */
 function mostrarGestionProductos(prestamo, productos) {
+    // Contar productos pendientes
+    const productosPendientes = productos.filter(p => p.estado_producto === 'pendiente');
+    const hayProductosPendientes = productosPendientes.length > 0;
+    
     let html = `
         <div class="mb-3">
             <h6>Préstamo #${prestamo.id} - ${prestamo.cliente_nombre}</h6>
@@ -716,45 +720,306 @@ function mostrarGestionProductos(prestamo, productos) {
         </div>
     `;
 
+    // Botones de acción múltiple (solo si hay productos pendientes)
+    if (hayProductosPendientes) {
+        html += `
+            <div class="mb-3 p-3 bg-light rounded">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="selectAll">
+                            <label class="form-check-label" for="selectAll">
+                                <strong>Seleccionar todos los productos pendientes</strong>
+                            </label>
+                        </div>
+                        <small class="text-muted">
+                            <span id="contadorSeleccionados">0</span> de ${productosPendientes.length} productos seleccionados
+                        </small>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button class="btn btn-success btn-sm me-2" id="btnDevolverSeleccionados" disabled>
+                            <i class="fas fa-undo me-1"></i>Devolver Seleccionados
+                        </button>
+                        <button class="btn btn-primary btn-sm" id="btnComprarSeleccionados" disabled>
+                            <i class="fas fa-shopping-cart me-1"></i>Comprar Seleccionados
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     productos.forEach(function(producto) {
         const estadoClass = producto.estado_producto === 'pendiente' ? 'producto-pendiente' : 
                            producto.estado_producto === 'devuelto' ? 'producto-devuelto' : 'producto-comprado';
+        
+        const subtotal = producto.precio_unitario * producto.cantidad;
 
         html += `
-            <div class="producto-item ${estadoClass}">
-                <div class="producto-header">
-                    <div class="producto-nombre">${producto.producto_nombre}</div>
-                    <div class="estado-producto ${producto.estado_producto}">${producto.estado_producto}</div>
-                </div>
-                <div class="producto-detalles">
-                    <strong>Talle:</strong> ${producto.talle || 'No especificado'} | 
-                    <strong>Cantidad:</strong> ${producto.cantidad} | 
-                    <strong>Precio Ref:</strong> $${parseFloat(producto.precio_unitario).toFixed(2)}
-                </div>
+            <div class="producto-item product-item ${estadoClass} mb-3 p-3 border rounded">
+                <div class="row align-items-center">
         `;
 
+        // Checkbox para productos pendientes
         if (producto.estado_producto === 'pendiente') {
             html += `
-                <div class="producto-acciones">
-                    <button class="btn btn-sm btn-success me-2" onclick="devolverProducto(${producto.id}, ${prestamo.id})">
-                        <i class="fas fa-undo me-1"></i>Devolver
-                    </button>
-                    <button class="btn btn-sm btn-primary" onclick="comprarProducto(${producto.id}, ${prestamo.id}, ${producto.precio_unitario * producto.cantidad})">
-                        <i class="fas fa-shopping-cart me-1"></i>Comprar
-                    </button>
-                </div>
+                    <div class="col-md-1">
+                        <div class="form-check">
+                            <input class="form-check-input product-checkbox" type="checkbox" 
+                                   value="${producto.id}"
+                                   data-detalle-id="${producto.id}" 
+                                   data-prestamo-id="${prestamo.id}" 
+                                   data-subtotal="${subtotal}">
+                        </div>
+                    </div>
             `;
-        } else if (producto.estado_producto === 'devuelto' && producto.fecha_devolucion_formato) {
-            html += `<div class="text-muted"><small>Devuelto el: ${producto.fecha_devolucion_formato}</small></div>`;
-        } else if (producto.estado_producto === 'comprado' && producto.venta_id) {
-            html += `<div class="text-muted"><small>Comprado - Venta #${producto.venta_id}</small></div>`;
+        } else {
+            html += `<div class="col-md-1"></div>`;
         }
 
-        html += `</div>`;
+        html += `
+                    <div class="col-md-8">
+                        <div class="producto-header">
+                            <h6 class="mb-1 product-name">${producto.producto_nombre} 
+                                <span class="badge bg-${obtenerColorEstado(producto.estado_producto)} ms-2">${producto.estado_producto}</span>
+                            </h6>
+                        </div>
+                        <div class="producto-detalles text-muted">
+                            <strong>Talle:</strong> ${producto.talle || 'No especificado'} | 
+                            <strong>Cantidad:</strong> ${producto.cantidad} | 
+                            <strong>Precio Unit:</strong> $${parseFloat(producto.precio_unitario).toFixed(2)} |
+                            <strong>Subtotal:</strong> $<span class="product-total">${subtotal.toFixed(2)}</span>
+                        </div>
+        `;
+
+        // Información adicional según el estado
+        if (producto.estado_producto === 'devuelto' && producto.fecha_devolucion_formato) {
+            html += `<small class="text-success"><i class="fas fa-check-circle me-1"></i>Devuelto el: ${producto.fecha_devolucion_formato}</small>`;
+        } else if (producto.estado_producto === 'comprado' && producto.venta_id) {
+            html += `<small class="text-primary"><i class="fas fa-shopping-cart me-1"></i>Comprado - Venta #${producto.venta_id}</small>`;
+        }
+
+        html += `
+                    </div>
+                    <div class="col-md-3 text-end">
+        `;
+
+        // Acciones individuales para productos pendientes
+        if (producto.estado_producto === 'pendiente') {
+            html += `
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-success btn-sm" onclick="devolverProducto(${producto.id}, ${prestamo.id})" title="Devolver">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" onclick="comprarProducto(${producto.id}, ${prestamo.id}, ${subtotal})" title="Comprar">
+                                <i class="fas fa-shopping-cart"></i>
+                            </button>
+                        </div>
+            `;
+        }
+
+        html += `
+                    </div>
+                </div>
+            </div>
+        `;
     });
 
     $('#gestionarProductosContent').html(html);
+    
+    // Configurar eventos para selección múltiple si hay productos pendientes
+    if (hayProductosPendientes) {
+        configurarSeleccionMultiple(prestamo.id);
+    }
+    
     $('#modalGestionarProductos').modal('show');
+}
+
+/**
+ * Configurar eventos para selección múltiple de productos
+ */
+function configurarSeleccionMultiple(prestamoId) {
+    // Evento para "Seleccionar todos"
+    $('#selectAll').change(function() {
+        const isChecked = $(this).is(':checked');
+        $('.product-checkbox').prop('checked', isChecked);
+        actualizarBotonesAccion();
+    });
+    
+    // Evento para checkboxes individuales
+    $(document).on('change', '.product-checkbox', function() {
+        const totalCheckboxes = $('.product-checkbox').length;
+        const checkedCheckboxes = $('.product-checkbox:checked').length;
+        
+        // Actualizar estado del "Seleccionar todos"
+        $('#selectAll').prop('checked', checkedCheckboxes === totalCheckboxes);
+        $('#selectAll').prop('indeterminate', checkedCheckboxes > 0 && checkedCheckboxes < totalCheckboxes);
+        
+        actualizarBotonesAccion();
+    });
+    
+    // Eventos para botones de acción múltiple
+    $('#btnDevolverSeleccionados').click(function() {
+        const productosSeleccionados = obtenerProductosSeleccionados();
+        if (productosSeleccionados.length === 0) {
+            Toast.fire({
+                icon: 'warning',
+                title: 'Selecciona al menos un producto'
+            });
+            return;
+        }
+        
+        Swal.fire({
+            title: '¿Confirmar devolución múltiple?',
+            text: `Devolverás ${productosSeleccionados.length} producto(s) seleccionado(s).`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, devolver',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                procesarAccionMultiple('devolver', productosSeleccionados, prestamoId);
+            }
+        });
+    });
+    
+    $('#btnComprarSeleccionados').click(function() {
+        const productosSeleccionados = obtenerProductosSeleccionados();
+        if (productosSeleccionados.length === 0) {
+            Toast.fire({
+                icon: 'warning',
+                title: 'Selecciona al menos un producto'
+            });
+            return;
+        }
+        
+        // Calcular total de productos seleccionados
+        let totalGeneral = 0;
+        productosSeleccionados.forEach(producto => {
+            totalGeneral += parseFloat(producto.total);
+        });
+        
+        // Abrir modal de compra múltiple
+        comprarProductosMultiples(productosSeleccionados, prestamoId, totalGeneral);
+    });
+}
+
+/**
+ * Obtener productos seleccionados
+ */
+function obtenerProductosSeleccionados() {
+    const productos = [];
+    $('.product-checkbox:checked').each(function() {
+        const row = $(this).closest('.product-item');
+        productos.push({
+            detalle_id: $(this).val(),
+            nombre: row.find('.product-name').text(),
+            total: parseFloat(row.find('.product-total').text())
+        });
+    });
+    return productos;
+}
+
+/**
+ * Actualizar estado de botones de acción
+ */
+function actualizarBotonesAccion() {
+    const cantidadSeleccionados = $('.product-checkbox:checked').length;
+    $('#btnDevolverSeleccionados, #btnComprarSeleccionados').prop('disabled', cantidadSeleccionados === 0);
+    
+    // Actualizar contador si existe
+    if ($('#contadorSeleccionados').length > 0) {
+        $('#contadorSeleccionados').text(cantidadSeleccionados);
+    }
+}
+
+/**
+ * Procesar acción múltiple (devolver varios productos)
+ */
+function procesarAccionMultiple(accion, productos, prestamoId) {
+    mostrarLoading();
+    
+    const promesas = productos.map(producto => {
+        return $.ajax({
+            url: 'controllers/gestionar_productos.php',
+            type: 'POST',
+            data: {
+                accion: accion,
+                detalle_id: producto.detalle_id,
+                prestamo_id: prestamoId
+            }
+        });
+    });
+    
+    Promise.all(promesas)
+        .then(responses => {
+            ocultarLoading();
+            
+            const exitosos = responses.filter(r => r.success).length;
+            const errores = responses.filter(r => !r.success).length;
+            
+            if (exitosos > 0) {
+                Toast.fire({
+                    icon: 'success',
+                    title: `${exitosos} producto(s) procesado(s) correctamente`
+                });
+                
+                // Actualizar tabla y cerrar modal
+                tablaPrestamos.ajax.reload();
+                $('#modalGestionarProductos').modal('hide');
+            }
+            
+            if (errores > 0) {
+                Toast.fire({
+                    icon: 'error',
+                    title: `${errores} producto(s) no pudieron procesarse`
+                });
+            }
+        })
+        .catch(error => {
+            ocultarLoading();
+            console.error('Error en operación múltiple:', error);
+            Toast.fire({
+                icon: 'error',
+                title: 'Error al procesar productos'
+            });
+        });
+}
+
+/**
+ * Comprar productos múltiples
+ */
+function comprarProductosMultiples(productos, prestamoId, totalGeneral) {
+    // Preparar lista de productos para mostrar
+    let listaProductos = productos.map(p => `• ${p.nombre}: $${p.total.toFixed(2)}`).join('\n');
+    
+    // Llenar datos en el modal
+    $('#detalle_id_venta').val(productos.map(p => p.detalle_id).join(','));
+    $('#prestamo_id_venta').val(prestamoId);
+    $('#total_producto_venta').val(totalGeneral);
+    $('#total_mostrar_venta').text(totalGeneral.toFixed(2));
+    
+    // Agregar información de productos múltiples
+    $('#productos_info_venta').html(`
+        <div class="alert alert-info">
+            <strong>Productos seleccionados (${productos.length}):</strong><br>
+            ${listaProductos.replace(/\n/g, '<br>')}
+            <hr>
+            <strong>Total: $${totalGeneral.toFixed(2)}</strong>
+        </div>
+    `);
+    
+    // Resetear formulario
+    $('#formConvertirVenta')[0].reset();
+    $('#detalle_id_venta').val(productos.map(p => p.detalle_id).join(','));
+    $('#prestamo_id_venta').val(prestamoId);
+    $('#total_producto_venta').val(totalGeneral);
+    $('#div_monto_pagado_venta').hide();
+    $('#monto_pagado_venta').removeAttr('required');
+    
+    // Cerrar modal de gestión y mostrar modal de venta
+    $('#modalGestionarProductos').modal('hide');
+    $('#modalConvertirVenta').modal('show');
 }
 
 /**
@@ -792,6 +1057,9 @@ function comprarProducto(detalleId, prestamoId, total) {
     $('#total_producto_venta').val(total);
     $('#div_monto_pagado_venta').hide();
     $('#monto_pagado_venta').removeAttr('required');
+    
+    // Limpiar información de productos múltiples
+    $('#productos_info_venta').html('');
     
     // Mostrar modal
     $('#modalConvertirVenta').modal('show');

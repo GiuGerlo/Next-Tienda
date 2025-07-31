@@ -199,7 +199,7 @@ include '../../includes/header.php';
                         <div class="col-12">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="mb-0">Productos del Préstamo</h6>
-                                <button type="button" class="btn btn-sm btn-outline-primary" id="agregarProducto">
+                                <button type="button" class="btn btn-sm btn-outline-success" id="agregarProducto">
                                     <i class="fas fa-plus me-1"></i>Agregar Producto
                                 </button>
                             </div>
@@ -299,9 +299,9 @@ include '../../includes/header.php';
                         <label for="metodo_pago_venta" class="form-label">Método de Pago:</label>
                         <select id="metodo_pago_venta" name="metodo_pago" class="form-select" required>
                             <option value="efectivo">Efectivo</option>
+                            <option value="transferencia">Transferencia</option>
                             <option value="tarjeta_debito">Tarjeta de Débito</option>
                             <option value="tarjeta_credito">Tarjeta de Crédito</option>
-                            <option value="transferencia">Transferencia</option>
                             <option value="cuenta_corriente">Cuenta Corriente</option>
                         </select>
                     </div>
@@ -322,6 +322,9 @@ include '../../includes/header.php';
                         </div>
                         <div class="form-text">Total: $<span id="total_mostrar_venta">0.00</span></div>
                     </div>
+                    
+                    <!-- Información de productos múltiples -->
+                    <div id="productos_info_venta"></div>
                 </form>
             </div>
             <div class="modal-footer">
