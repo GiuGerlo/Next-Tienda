@@ -457,3 +457,8 @@
 .indicador-normal {
     color: #6c757d;
 }
+
+/* Arreglo de filtro por registros */
+div.dataTables_wrapper div.dataTables_length select {
+    width: 4rem !important;
+}

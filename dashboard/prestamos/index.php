@@ -101,11 +101,8 @@ include '../../includes/header.php';
                                 </div>
                             </div>
                             <div class="col-md-2 d-flex align-items-end">
-                                <button type="button" class="btn btn-outline-secondary me-2" id="limpiar_filtros">
+                                <button type="button" class="btn btn-outline-secondary" id="limpiar_filtros">
                                     <i class="fas fa-times me-1"></i>Limpiar
-                                </button>
-                                <button type="button" class="btn btn-primary" id="aplicar_filtros">
-                                    <i class="fas fa-search me-1"></i>Buscar
                                 </button>
                             </div>
                         </div>
@@ -249,7 +246,7 @@ include '../../includes/header.php';
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="detallesPrestamoContent">
+            <div class="modal-body text-center" id="detallesPrestamoContent">
                 <!-- Contenido cargado dinámicamente -->
             </div>
             <div class="modal-footer">

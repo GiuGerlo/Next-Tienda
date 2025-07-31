@@ -71,7 +71,7 @@ function inicializarTabla() {
         language: {
             url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
         },
-        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6">>' +
              '<"row"<"col-sm-12"tr>>' +
              '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
         drawCallback: function() {
@@ -97,11 +97,16 @@ function inicializarTabla() {
  * Inicializar eventos
  */
 function inicializarEventos() {
-    // Filtros
-    $('#aplicar_filtros').on('click', function() {
+    // Filtros dinámicos - se aplican automáticamente
+    $('#filtro_fecha_desde, #filtro_fecha_hasta, #filtro_estado').on('change', function() {
         tabla.ajax.reload();
     });
 
+    $('#filtro_vencidos').on('change', function() {
+        tabla.ajax.reload();
+    });
+
+    // Limpiar filtros
     $('#limpiar_filtros').on('click', function() {
         $('#filtro_fecha_desde').val('');
         $('#filtro_fecha_hasta').val('');
@@ -109,6 +114,15 @@ function inicializarEventos() {
         $('#filtro_estado').val('');
         $('#filtro_vencidos').prop('checked', false);
         tabla.ajax.reload();
+    });
+
+    // Filtro de cliente dinámico con delay para evitar muchas consultas
+    let timeoutFiltroCliente;
+    $('#filtro_cliente').on('input', function() {
+        clearTimeout(timeoutFiltroCliente);
+        timeoutFiltroCliente = setTimeout(() => {
+            tabla.ajax.reload();
+        }, 500); // Espera 500ms después de que el usuario deje de escribir
     });
 
     // Autocompletado de cliente
@@ -344,8 +358,7 @@ function seleccionarCliente(nombre) {
     $('#filtro_cliente').val(nombre);
     $('#sugerencias_cliente').hide();
     
-    // Aplicar filtro automáticamente
-    tabla.ajax.reload();
+    // El filtro se aplicará automáticamente por el evento 'input'
 }
 
 /**
