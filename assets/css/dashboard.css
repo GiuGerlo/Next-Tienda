@@ -120,6 +120,10 @@ html, body {
     background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
 }
 
+.debt-card .stats-icon {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+}
+
 .stats-content {
     flex: 1;
 }
@@ -147,6 +151,7 @@ html, body {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+    margin-bottom: 0.5rem;
 }
 
 .stats-trend.positive {
@@ -162,6 +167,15 @@ html, body {
 .stats-trend.neutral {
     background: rgba(108, 117, 125, 0.1);
     color: #6c757d;
+}
+
+.stats-extra {
+    margin-top: 0.5rem;
+}
+
+.stats-extra small {
+    font-size: 0.75rem;
+    font-weight: 500;
 }
 
 /* Tarjetas del Dashboard */
@@ -238,10 +252,25 @@ html, body {
     align-items: center;
     padding: 1rem 0;
     border-bottom: 1px solid #f1f3f4;
+    transition: all 0.3s ease;
 }
 
 .loan-item:last-child {
     border-bottom: none;
+}
+
+.loan-item:hover {
+    background-color: rgba(248, 251, 96, 0.05);
+    border-radius: 8px;
+    margin: 0 -0.5rem;
+    padding: 1rem 0.5rem;
+}
+
+.loan-item.loan-overdue {
+    background-color: rgba(220, 53, 69, 0.05);
+    border-left: 3px solid #dc3545;
+    padding-left: 1rem;
+    margin-left: -1rem;
 }
 
 .loan-info h6 {
@@ -258,6 +287,68 @@ html, body {
 
 .loan-status {
     text-align: right;
+}
+
+/* Rankings de productos y clientes */
+.products-ranking,
+.clients-ranking {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.product-rank-item,
+.client-rank-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f1f3f4;
+    transition: all 0.3s ease;
+}
+
+.product-rank-item:last-child,
+.client-rank-item:last-child {
+    border-bottom: none;
+}
+
+.product-rank-item:hover,
+.client-rank-item:hover {
+    background-color: rgba(248, 251, 96, 0.05);
+    border-radius: 8px;
+    margin: 0 -0.5rem;
+    padding: 1rem 0.5rem;
+}
+
+.rank-number {
+    flex-shrink: 0;
+}
+
+.rank-number .badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.product-info,
+.client-info {
+    flex: 1;
+}
+
+.product-name,
+.client-name {
+    font-weight: 600;
+    color: var(--next-dark);
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+.product-stats,
+.client-stats {
+    flex-shrink: 0;
 }
 
 /* Accesos Rápidos */

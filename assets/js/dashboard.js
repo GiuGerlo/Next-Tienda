@@ -20,14 +20,23 @@ document.addEventListener('DOMContentLoaded', function() {
         updateDateTime();
         setInterval(updateDateTime, 60000); // Actualizar cada minuto
         
-        // Inicializar tooltips
-        initializeTooltips();
+        // Inicializar tooltips dinámicos
+        addDynamicTooltips();
+        
+        // Inicializar contadores animados
+        initializeCounters();
         
         // Auto-refresh de estadísticas cada 5 minutos
         setInterval(refreshStats, 300000);
         
         // Añadir efectos de hover mejorados
         enhanceHoverEffects();
+
+        // Comprobar conexión a internet
+        checkConnection();
+        
+        // Agregar indicador de carga
+        addLoadingIndicator();
     }
     
     /**
@@ -109,7 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
             ventas: document.querySelector('.sales-card .stats-number'),
             ingresos: document.querySelector('.revenue-card .stats-number'),
             prestamos: document.querySelector('.loans-card .stats-number'),
-            usuarios: document.querySelector('.users-card .stats-number')
+            deudas: document.querySelector('.debt-card .stats-number')
         };
         
         if (elements.ventas) {
@@ -121,9 +130,41 @@ document.addEventListener('DOMContentLoaded', function() {
         if (elements.prestamos) {
             animateNumber(elements.prestamos, stats.prestamos_activos);
         }
-        if (elements.usuarios) {
-            animateNumber(elements.usuarios, stats.total_usuarios);
+        if (elements.deudas) {
+            animateNumber(elements.deudas, stats.monto_por_cobrar, '$');
         }
+
+        // Actualizar tendencias
+        updateTrends(stats);
+    }
+
+    /**
+     * Actualiza las tendencias en las tarjetas
+     */
+    function updateTrends(stats) {
+        const ventasTrend = document.querySelector('.sales-card .stats-trend');
+        const ingresosTrend = document.querySelector('.revenue-card .stats-trend');
+        
+        if (ventasTrend && stats.ventas_cambio !== undefined) {
+            updateTrendElement(ventasTrend, stats.ventas_cambio);
+        }
+        
+        if (ingresosTrend && stats.ingresos_cambio !== undefined) {
+            updateTrendElement(ingresosTrend, stats.ingresos_cambio);
+        }
+    }
+
+    /**
+     * Actualiza un elemento de tendencia
+     */
+    function updateTrendElement(element, cambio) {
+        const isPositive = cambio >= 0;
+        const isNeutral = cambio === 0;
+        
+        element.className = `stats-trend ${isNeutral ? 'neutral' : (isPositive ? 'positive' : 'negative')}`;
+        
+        const icon = isNeutral ? 'fas fa-minus' : `fas fa-arrow-${isPositive ? 'up' : 'down'}`;
+        element.innerHTML = `<i class="${icon}"></i> ${Math.abs(cambio)}%`;
     }
     
     /**
@@ -194,6 +235,82 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 600);
             });
         });
+
+        // Efectos en rankings
+        enhanceRankingEffects();
+    }
+
+    /**
+     * Mejora los efectos en los rankings
+     */
+    function enhanceRankingEffects() {
+        const rankItems = document.querySelectorAll('.product-rank-item, .client-rank-item, .loan-item');
+        
+        rankItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+    }
+
+    /**
+     * Agrega tooltips dinámicos
+     */
+    function addDynamicTooltips() {
+        // Tooltips para préstamos vencidos
+        const overdueLoans = document.querySelectorAll('.loan-overdue');
+        overdueLoans.forEach(loan => {
+            loan.setAttribute('data-bs-toggle', 'tooltip');
+            loan.setAttribute('data-bs-placement', 'top');
+            loan.setAttribute('title', 'Este préstamo está vencido');
+        });
+
+        // Tooltips para rankings
+        const rankBadges = document.querySelectorAll('.rank-number .badge');
+        rankBadges.forEach((badge, index) => {
+            const position = index + 1;
+            let title = '';
+            if (position === 1) title = '🥇 Primer lugar';
+            else if (position === 2) title = '🥈 Segundo lugar';
+            else if (position === 3) title = '🥉 Tercer lugar';
+            else title = `Posición #${position}`;
+            
+            badge.setAttribute('data-bs-toggle', 'tooltip');
+            badge.setAttribute('data-bs-placement', 'top');
+            badge.setAttribute('title', title);
+        });
+
+        // Reinicializar tooltips
+        initializeTooltips();
+    }
+
+    /**
+     * Inicializa contadores animados
+     */
+    function initializeCounters() {
+        const statsNumbers = document.querySelectorAll('.stats-number');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const element = entry.target;
+                    const text = element.textContent;
+                    const number = parseInt(text.replace(/[^0-9]/g, '')) || 0;
+                    const prefix = text.replace(/[0-9,]/g, '');
+                    
+                    animateNumber(element, number, prefix);
+                    observer.unobserve(element);
+                }
+            });
+        });
+        
+        statsNumbers.forEach(number => {
+            observer.observe(number);
+        });
     }
     
     /**
@@ -244,23 +361,118 @@ document.addEventListener('DOMContentLoaded', function() {
         card.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
             
-            // Si el módulo no existe aún, mostrar mensaje
-            if (href && (href.includes('ventas') || href.includes('prestamos') || href.includes('reportes') || href.includes('configuracion'))) {
-                e.preventDefault();
-                showNotification('Módulo en desarrollo. Próximamente disponible.', 'info');
-            }
+            // Agregar efecto de clic
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
         });
     });
+
+    /**
+     * Comprueba la conexión a internet
+     */
+    function checkConnection() {
+        if (!navigator.onLine) {
+            showNotification('Sin conexión a internet. Algunas funciones pueden no estar disponibles.', 'warning');
+        }
+        
+        window.addEventListener('online', () => {
+            showNotification('Conexión restaurada', 'success');
+        });
+        
+        window.addEventListener('offline', () => {
+            showNotification('Conexión perdida', 'warning');
+        });
+    }
+
+    /**
+     * Agrega indicador de carga
+     */
+    function addLoadingIndicator() {
+        const cards = document.querySelectorAll('.dashboard-card, .stats-card');
+        cards.forEach(card => {
+            card.classList.add('loaded');
+        });
+    }
+
+    /**
+     * Formatea números para mostrar
+     */
+    function formatNumber(number, prefix = '') {
+        if (number >= 1000000) {
+            return prefix + (number / 1000000).toFixed(1) + 'M';
+        } else if (number >= 1000) {
+            return prefix + (number / 1000).toFixed(1) + 'K';
+        }
+        return prefix + number.toLocaleString();
+    }
 });
 
-// CSS para la animación de ondas
-const style = document.createElement('style');
-style.textContent = `
+// CSS adicional para las nuevas funcionalidades
+const additionalStyle = document.createElement('style');
+additionalStyle.textContent = `
     @keyframes ripple {
         to {
             transform: scale(2);
             opacity: 0;
         }
     }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .stats-card.loaded,
+    .dashboard-card.loaded {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .loan-overdue {
+        animation: pulse 2s infinite;
+    }
+
+    .rank-number .badge.bg-warning {
+        animation: pulse 1.5s infinite;
+    }
+
+    .quick-action-card:active {
+        transform: scale(0.95) !important;
+    }
+
+    /* Mejoras responsivas */
+    @media (max-width: 768px) {
+        .product-rank-item,
+        .client-rank-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+        
+        .rank-number {
+            order: -1;
+        }
+        
+        .product-stats,
+        .client-stats {
+            margin-top: 0.5rem;
+        }
+    }
 `;
-document.head.appendChild(style);
+document.head.appendChild(additionalStyle);

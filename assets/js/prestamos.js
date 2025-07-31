@@ -6,6 +6,20 @@
 let tabla;
 let contadorProductos = 0;
 
+/**
+ * Formatear número sin decimales innecesarios
+ * @param {number} numero - El número a formatear
+ * @returns {string} - Número formateado
+ */
+function formatearNumero(numero) {
+    // Si el número es entero, no mostrar decimales
+    if (numero % 1 === 0) {
+        return numero.toString();
+    }
+    // Si tiene decimales, mostrar con 2 decimales
+    return numero.toFixed(2);
+}
+
 // Configuración de SweetAlert Toast (igual que ventas)
 const Toast = Swal.mixin({
     toast: true,
@@ -200,7 +214,7 @@ function inicializarEventos() {
             if (parseFloat(montoPagado) > total) {
                 Toast.fire({
                     icon: 'error',
-                    title: `El monto no puede ser mayor al total ($${total.toFixed(2)})`
+                    title: `El monto no puede ser mayor al total ($${formatearNumero(total)})`
                 });
                 return;
             }
@@ -384,7 +398,7 @@ function configurarFechasPorDefecto() {
 function limpiarFormulario() {
     $('#formPrestamo')[0].reset();
     $('#productosContainer').empty();
-    $('#totalPrestamo').text('0.00');
+    $('#totalPrestamo').text('0');
     $('#modalPrestamoLabel').html('<i class="fas fa-handshake me-2"></i>Nuevo Préstamo');
     contadorProductos = 0;
     configurarFechasPorDefecto();
@@ -430,7 +444,7 @@ function agregarFilaProducto() {
                 </div>
             </td>
             <td class="text-end">
-                <span class="subtotal-producto">$0.00</span>
+                <span class="subtotal-producto">$0</span>
             </td>
             <td class="text-center">
                 <button type="button" class="btn btn-sm btn-outline-danger eliminar-producto" title="Eliminar">
@@ -449,7 +463,7 @@ function calcularSubtotal(fila) {
     const cantidad = parseFloat(fila.find('.cantidad-producto').val()) || 0;
     const precio = parseFloat(fila.find('.precio-producto').val()) || 0;
     const subtotal = cantidad * precio;
-    fila.find('.subtotal-producto').text('$' + subtotal.toFixed(2));
+    fila.find('.subtotal-producto').text('$' + formatearNumero(subtotal));
 }
 
 /**
@@ -461,7 +475,7 @@ function calcularTotal() {
         const subtotal = parseFloat($(this).text().replace('$', '')) || 0;
         total += subtotal;
     });
-    $('#totalPrestamo').text(total.toFixed(2));
+    $('#totalPrestamo').text(formatearNumero(total));
 }
 
 /**
@@ -614,7 +628,7 @@ function mostrarDetallesPrestamo(prestamo, productos, totalValor) {
                 </div>
                 <div class="detalle-item">
                     <div class="detalle-label">Valor Referencial:</div>
-                    <div class="detalle-valor">$${totalValor.toFixed(2)}</div>
+                    <div class="detalle-valor">$${formatearNumero(totalValor)}</div>
                 </div>
             </div>
         </div>
@@ -659,7 +673,7 @@ function mostrarDetallesPrestamo(prestamo, productos, totalValor) {
                 <td>${producto.producto_nombre}</td>
                 <td>${producto.talle || '-'}</td>
                 <td>${producto.cantidad}</td>
-                <td>$${parseFloat(producto.precio_unitario).toFixed(2)}</td>
+                <td>$${formatearNumero(parseFloat(producto.precio_unitario))}</td>
                 <td>
                     <span class="badge bg-${obtenerColorEstado(producto.estado_producto)}">${producto.estado_producto}</span>
                 </td>
@@ -800,8 +814,8 @@ function mostrarGestionProductos(prestamo, productos) {
                         <div class="producto-detalles text-muted">
                             <strong>Talle:</strong> ${producto.talle || 'No especificado'} | 
                             <strong>Cantidad:</strong> ${producto.cantidad} | 
-                            <strong>Precio Unit:</strong> $${parseFloat(producto.precio_unitario).toFixed(2)} |
-                            <strong>Subtotal:</strong> $<span class="product-total">${subtotal.toFixed(2)}</span>
+                            <strong>Precio Unit:</strong> $${formatearNumero(parseFloat(producto.precio_unitario))} |
+                            <strong>Subtotal:</strong> $<span class="product-total">${formatearNumero(subtotal)}</span>
                         </div>
         `;
 
@@ -1004,13 +1018,13 @@ function procesarAccionMultiple(accion, productos, prestamoId) {
  */
 function comprarProductosMultiples(productos, prestamoId, totalGeneral) {
     // Preparar lista de productos para mostrar
-    let listaProductos = productos.map(p => `• ${p.nombre}: $${p.total.toFixed(2)}`).join('\n');
+    let listaProductos = productos.map(p => `• ${p.nombre}: $${formatearNumero(p.total)}`).join('\n');
     
     // Llenar datos en el modal
     $('#detalle_id_venta').val(productos.map(p => p.detalle_id).join(','));
     $('#prestamo_id_venta').val(prestamoId);
     $('#total_producto_venta').val(totalGeneral);
-    $('#total_mostrar_venta').text(totalGeneral.toFixed(2));
+    $('#total_mostrar_venta').text(formatearNumero(totalGeneral));
     
     // Agregar información de productos múltiples
     $('#productos_info_venta').html(`
@@ -1018,7 +1032,7 @@ function comprarProductosMultiples(productos, prestamoId, totalGeneral) {
             <strong>Productos seleccionados (${productos.length}):</strong><br>
             ${listaProductos.replace(/\n/g, '<br>')}
             <hr>
-            <strong>Total: $${totalGeneral.toFixed(2)}</strong>
+            <strong>Total: $${formatearNumero(totalGeneral)}</strong>
         </div>
     `);
     
@@ -1061,7 +1075,7 @@ function comprarProducto(detalleId, prestamoId, total) {
     $('#detalle_id_venta').val(detalleId);
     $('#prestamo_id_venta').val(prestamoId);
     $('#total_producto_venta').val(total);
-    $('#total_mostrar_venta').text(total.toFixed(2));
+    $('#total_mostrar_venta').text(formatearNumero(total));
     
     // Resetear formulario
     $('#formConvertirVenta')[0].reset();

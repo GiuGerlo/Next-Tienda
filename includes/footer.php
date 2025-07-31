@@ -1,3 +1,45 @@
+<?php
+// Obtener estadísticas para el footer si no están definidas
+if (!isset($footer_stats)) {
+    try {
+        // Solo obtener estadísticas si tenemos conexión a BD disponible
+        if (isset($pdo)) {
+            // Ventas del mes
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) as total_ventas 
+                FROM ventas 
+                WHERE MONTH(fecha_venta) = MONTH(CURRENT_DATE()) 
+                AND YEAR(fecha_venta) = YEAR(CURRENT_DATE())
+            ");
+            $stmt->execute();
+            $ventas_mes = $stmt->fetchColumn();
+
+            // Préstamos activos
+            $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM prestamos WHERE estado IN ('pendiente', 'parcial')");
+            $stmt->execute();
+            $prestamos_activos = $stmt->fetchColumn();
+
+            $footer_stats = [
+                'ventas_mes' => $ventas_mes,
+                'prestamos_activos' => $prestamos_activos
+            ];
+        } else {
+            // Valores por defecto si no hay conexión
+            $footer_stats = [
+                'ventas_mes' => 0,
+                'prestamos_activos' => 0
+            ];
+        }
+    } catch (Exception $e) {
+        // En caso de error, usar valores por defecto
+        $footer_stats = [
+            'ventas_mes' => 0,
+            'prestamos_activos' => 0
+        ];
+    }
+}
+?>
+
     <!-- Footer -->
     <footer class="bg-white border-top mt-5">
         <div class="container-fluid">
@@ -59,14 +101,14 @@
                     <div class="row g-2">
                         <div class="col-6">
                             <div class="text-center p-2 rounded" style="background: rgba(248, 251, 96, 0.1);">
-                                <div class="fw-bold text-dark">0</div>
-                                <small class="text-muted">Ventas Hoy</small>
+                                <div class="fw-bold text-dark"><?= number_format($footer_stats['ventas_mes']) ?></div>
+                                <small class="text-muted">Ventas del Mes</small>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="text-center p-2 rounded" style="background: rgba(114, 116, 118, 0.1);">
-                                <div class="fw-bold text-dark">0</div>
-                                <small class="text-muted">Préstamos</small>
+                                <div class="fw-bold text-dark"><?= number_format($footer_stats['prestamos_activos']) ?></div>
+                                <small class="text-muted">Préstamos Activos</small>
                             </div>
                         </div>
                     </div>
@@ -88,15 +130,11 @@
                     <div class="text-muted">
                         <div class="d-flex align-items-center mb-2">
                             <i class="fas fa-envelope me-2" style="color: var(--next-yellow);"></i>
-                            <small>soporte@nextsystem.com</small>
+                            <small>ggiuliano526@gmail.com</small>
                         </div>
                         <div class="d-flex align-items-center mb-2">
                             <i class="fas fa-phone me-2" style="color: var(--next-yellow);"></i>
-                            <small>+54 9 11 1234-5678</small>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-clock me-2" style="color: var(--next-yellow);"></i>
-                            <small>Lun - Vie: 9:00 - 18:00</small>
+                            <small>+54 9 3468546422</small>
                         </div>
                     </div>
                 </div>
