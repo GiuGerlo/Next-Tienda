@@ -1,3 +1,93 @@
-Requerimientos_Sistema_Next.txt
-database/
+# Configuración de base de datos
+config/connect.php
+
+# Archivos de configuración sensibles
+*.env
+.env
+.env.local
+.env.production
+
+# Logs del sistema
+*.log
+logs/
+error.log
+access.log
+
+# Archivos temporales de PHP
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Archivos de sesión
+sessions/
+*.sess
+
+# Uploads y archivos subidos por usuarios
+uploads/
+files/
+*.uploaded
+
+# Archivos de backup de base de datos
+*.sql.backup
+*.sql.bak
+backup/
+backups/
+
+# Archivos del sistema operativo
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# IDEs y editores
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Composer
+vendor/
+composer.lock
+
+# Node.js (si se usa)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de desarrollo
+*.dev
+*.development
+debug/
+
+# Documentación temporal
+docs/temp/
+*.md.backup
+
+# Archivos de Excel generados
+*.xls
+*.xlsx
+reportes/
+exports/
+
+# Cache
+cache/
+*.cache
+
+# Instrucciones de desarrollo (mantener en privado)
 instrucciones/
+database/
+
+# Archivos de testing
+test/
+tests/
+phpunit.xml
+.phpunit.result.cache
