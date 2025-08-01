@@ -11,6 +11,16 @@ if (isset($_SESSION['user_id'])) {
 // Variables para manejar mensajes
 $error_message = '';
 $success_message = '';
+
+// Incluir el middleware de autenticación
+require_once 'controllers/auth.php';
+
+// Si no está autenticado, mostrar alert y detener ejecución
+startLongSessionIfRemembered();
+if (!isAuthenticated()) {
+    echo "<script>alert('No tenés permisos para acceder a esta página.'); window.history.back();</script>";
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -157,5 +167,7 @@ $success_message = '';
     <!-- Custom JS -->
     <script src="assets/js/main.js"></script>
     <script src="assets/js/register.js"></script>
+</body>
+</html>
 </body>
 </html>

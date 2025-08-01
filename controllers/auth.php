@@ -14,10 +14,33 @@ function isAuthenticated() {
 }
 
 /**
+ * Inicia la sesión con duración prolongada si corresponde
+ */
+function startLongSessionIfRemembered() {
+    // Si la cookie de sesión ya existe, no modificar
+    if (session_status() === PHP_SESSION_NONE) {
+        // Si el usuario eligió "recordar sesión", extender duración
+        if (isset($_COOKIE['remember_email']) && !empty($_COOKIE['remember_email'])) {
+            $lifetime = 30 * 24 * 60 * 60;
+            session_set_cookie_params([
+                'lifetime' => $lifetime,
+                'path' => '/',
+                'domain' => '',
+                'secure' => isset($_SERVER['HTTPS']),
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ]);
+        }
+        session_start();
+    }
+}
+
+/**
  * Requiere autenticación, redirige al login si no está autenticado
  * @param string $redirect_url URL a la que redirigir si no está autenticado
  */
 function requireAuth($redirect_url = '../index.php') {
+    startLongSessionIfRemembered();
     // Iniciar sesión si no está iniciada
     if (session_status() === PHP_SESSION_NONE) {
         session_start();

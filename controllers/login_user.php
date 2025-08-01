@@ -1,7 +1,6 @@
 <?php
 // Evitar cualquier output antes del JSON
 ob_start();
-session_start();
 require_once '../config/connect.php';
 
 // Limpiar cualquier output previo
@@ -35,6 +34,23 @@ $remember_me = isset($_POST['remember_me']);
 if (empty($email) || empty($password)) {
     sendJsonResponse(false, 'Por favor, completa todos los campos.');
 }
+
+// Antes de session_start(), configurar duración de sesión si "remember_me"
+if (isset($_POST['remember_me'])) {
+    // 30 días en segundos
+    $lifetime = 30 * 24 * 60 * 60;
+    session_set_cookie_params([
+        'lifetime' => $lifetime,
+        'path' => '/',
+        'domain' => '', // Cambia si usas subdominios
+        'secure' => isset($_SERVER['HTTPS']),
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
+}
+
+// Iniciar sesión
+session_start();
 
 try {
     // Buscar usuario por email
@@ -82,4 +98,5 @@ try {
     error_log("Error general en login: " . $e->getMessage());
     sendJsonResponse(false, 'Error inesperado. Intenta nuevamente.');
 }
+?>
 ?>

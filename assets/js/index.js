@@ -274,6 +274,6 @@ document.head.appendChild(style);
 /**
  * Credential hints para desarrollo
  */
-console.log('🔐 Credenciales de prueba:');
-console.log('📧 Email: admin@next.com');
-console.log('🔑 Password: admin123');
+// console.log('🔐 Credenciales de prueba:');
+// console.log('📧 Email: admin@next.com');
+// console.log('🔑 Password: admin123');
